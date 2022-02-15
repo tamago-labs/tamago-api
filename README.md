@@ -11,7 +11,7 @@ The repo contains backend applications including databases, email & notification
 
 ### Deployment
 
-Assuming you've already setup the credential of AWS CLI & Pulumi, once ready you can setup liquidation and disputer bots on your AWS account by the following scripts:
+Assuming you've already setup the credential of AWS CLI & Pulumi, once ready you can deploy it all by run: 
 
 ```
 pulumi up
