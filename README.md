@@ -22,3 +22,7 @@ To get a log stream from the container, use (Or checkout on Cloudwatch)
 ```
 pulumi logs --follow
 ```
+
+## License
+
+MIT ©
