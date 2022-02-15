@@ -21,10 +21,39 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
                             statusCode: 200,
                             headers: Headers,
                             body: JSON.stringify({ 
-                                name : "TBD",
-                                description : "TBD",
+                                name : "Lucky Red Envelope NFT collection from Tamago Finance, each presents the specific amount of USD and backs by the value of SushiSwap LP tokens",
+                                description : "The first value-backed NFT",
                                 external_url : "https://tamago.finance",
-                                image : `https://img.tamago.finance/angpow/${tokenId}.png`
+                                image : `https://img.tamago.finance/lucky-red-envelope/${tokenId}.png`
+                             }),
+                        }
+                    }
+                }
+
+                return {
+                    statusCode: 200,
+                    headers: Headers,
+                    body: JSON.stringify({
+                        status: "error",
+                        message: "Invalid ID"
+                    }),
+                }
+            }
+        },
+        {
+            method: "GET", path: "/polygon/{proxy+}", eventHandler: async (event) => {
+
+                if (event && event.pathParameters) {
+                    const tokenId = event.pathParameters.proxy
+                    if (["1", "2", "3"].indexOf(tokenId) !== -1) {
+                        return {
+                            statusCode: 200,
+                            headers: Headers,
+                            body: JSON.stringify({ 
+                                name : "Lucky Red Envelope NFT on Polygon",
+                                description : "The first value-backed NFT from Tamago Finance, each presents the specific amount of USD and backs by the value of QuickSwap LP tokens",
+                                external_url : "https://tamago.finance",
+                                image : `https://img.tamago.finance/lucky-red-envelope/polygon/${tokenId}.png`
                              }),
                         }
                     }
@@ -54,7 +83,7 @@ const domain = new aws.apigateway.DomainName("domain", {
 
 const mapping = new aws.apigateway.BasePathMapping("mapping", {
     restApi: angpowApi.restAPI,
-    basePath: "angpow",
+    basePath: "lucky-red-envelope",
     stageName: angpowApi.stage.stageName,
     domainName: domain.domainName,
 });
