@@ -9,6 +9,25 @@ const Headers = {
     "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
 }
 
+const dataTable = new aws.dynamodb.Table(
+    "dataTable",
+    {
+        attributes: [
+            {
+                name: "key",
+                type: "S"
+            },
+            {
+                name: "value",
+                type: "S"
+            }
+        ],
+        hashKey: "key",
+        rangeKey: "value",
+        billingMode: "PAY_PER_REQUEST"
+    }
+)
+
 const angpowApi = new awsx.apigateway.API("angpow-api", {
     routes: [
         {
@@ -20,18 +39,18 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
                         return {
                             statusCode: 200,
                             headers: Headers,
-                            body: JSON.stringify({ 
-                                name : "Lucky Red Envelope NFT collection from Tamago Finance, each presents the specific amount of USD and backs by the value of SushiSwap LP tokens",
-                                description : "The first value-backed NFT",
-                                external_url : "https://tamago.finance",
-                                image : `https://img.tamago.finance/lucky-red-envelope/${tokenId}.png`
-                             }),
+                            body: JSON.stringify({
+                                name: "Lucky Red Envelope NFT collection from Tamago Finance, each presents the specific amount of USD and backs by the value of SushiSwap LP tokens",
+                                description: "The first value-backed NFT",
+                                external_url: "https://tamago.finance",
+                                image: `https://img.tamago.finance/lucky-red-envelope/${tokenId}.png`
+                            }),
                         }
                     }
                 }
 
                 return {
-                    statusCode: 200,
+                    statusCode: 400,
                     headers: Headers,
                     body: JSON.stringify({
                         status: "error",
@@ -49,22 +68,122 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
                         return {
                             statusCode: 200,
                             headers: Headers,
-                            body: JSON.stringify({ 
-                                name : "Lucky Red Envelope NFT on Polygon",
-                                description : "The first value-backed NFT from Tamago Finance, each presents the specific amount of USD and backs by the value of QuickSwap LP tokens",
-                                external_url : "https://tamago.finance",
-                                image : `https://img.tamago.finance/lucky-red-envelope/polygon/${tokenId}.png`
-                             }),
+                            body: JSON.stringify({
+                                name: "Lucky Red Envelope NFT on Polygon",
+                                description: "The first value-backed NFT from Tamago Finance, each presents the specific amount of USD and backs by the value of QuickSwap LP tokens",
+                                external_url: "https://tamago.finance",
+                                image: `https://img.tamago.finance/lucky-red-envelope/polygon/${tokenId}.png`
+                            }),
                         }
                     }
                 }
 
                 return {
-                    statusCode: 200,
+                    statusCode: 400,
                     headers: Headers,
                     body: JSON.stringify({
                         status: "error",
                         message: "Invalid ID"
+                    }),
+                }
+            }
+        },
+        {
+            method: "GET", path: "/account/{proxy+}", eventHandler: async (event) => {
+
+                if (event && event.pathParameters) {
+                    const client = new aws.sdk.DynamoDB.DocumentClient()
+                    const accountId = event.pathParameters.proxy
+
+                    const params = {
+                        TableName: dataTable.name.get(),
+                        Key: {
+                            "key": "account",
+                            "value": accountId
+                        }
+                    };
+
+                    const { Item } = await client.get(params).promise()
+
+                    if (Item) {
+                        return {
+                            statusCode: 200,
+                            headers: Headers,
+                            body: JSON.stringify({
+                                status : "ok",
+                                account: accountId,
+                                disabled : Item.disabled
+                            }),
+                        }
+                    }
+                }
+
+                return {
+                    statusCode: 400,
+                    headers: Headers,
+                    body: JSON.stringify({
+                        status: "error",
+                        message: "Invalid ID"
+                    }),
+                }
+            }
+        },
+        // FIXME: sign the message and verify before add a new record
+        {
+            method: "POST", path: "/account", eventHandler: async (event) => {
+
+                if (event && event.body) {
+
+                    const buff = Buffer.from(event.body, "base64");
+                    const eventBodyStr = buff.toString('UTF-8');
+                    const eventBody = JSON.parse(eventBodyStr);
+
+                    console.log("Receiving payload : ", eventBody)
+
+                    // example payload
+                    // {
+                    //     username : pisuthd.nft,
+                    //     address : xxxx,
+                    //     disabled : false,
+                    //     email : pisuth@tamago.finance
+                    // }
+
+                    if (eventBody && eventBody.username) {
+
+                        const params = {
+                            TableName: dataTable.name.get(),
+                            Item: {
+                                ...eventBody,
+                                "key": "account",
+                                "value": eventBody.username
+                            }
+                        }
+
+                        console.log("saving : ", params)
+
+                        const client = new aws.sdk.DynamoDB.DocumentClient()
+
+                        await client.put(params).promise()
+
+                        return {
+                            statusCode: 200,
+                            headers: Headers,
+                            body: JSON.stringify({
+                                "status" : "ok",
+                                "username" : eventBody.username
+                            }),
+                        }
+
+                    }
+
+                }
+
+                return {
+                    statusCode: 400,
+                    headers: Headers,
+                    body: JSON.stringify({
+                        status: "error",
+                        message: "Invalid Payload"
                     }),
                 }
             }
@@ -98,4 +217,7 @@ const record = new aws.route53.Record("record", {
         evaluateTargetHealth: true,
     }],
 });
+
+
+
 
