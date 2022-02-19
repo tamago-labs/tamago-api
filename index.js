@@ -79,7 +79,7 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
                 }
 
                 return {
-                    statusCode: 400,
+                    statusCode: 200,
                     headers: Headers,
                     body: JSON.stringify({
                         status: "error",
@@ -110,16 +110,16 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
                             statusCode: 200,
                             headers: Headers,
                             body: JSON.stringify({
-                                status : "ok",
+                                status: "ok",
                                 account: accountId,
-                                disabled : Item.disabled
+                                disabled: Item.disabled
                             }),
                         }
                     }
                 }
 
                 return {
-                    statusCode: 400,
+                    statusCode: 200,
                     headers: Headers,
                     body: JSON.stringify({
                         status: "error",
@@ -128,13 +128,18 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
                 }
             }
         },
-        // FIXME: sign the message and verify before add a new record
+        // FIXME: sign the message and verify before add a new record / use POST method and fix CORS issues
         {
-            method: "POST", path: "/account", eventHandler: async (event) => {
+            method: "GET", path: "/accountUpdate/{proxy+}", eventHandler: async (event) => {
 
-                if (event && event.body) {
+                console.log("Incoming event --> ", event)
 
-                    const buff = Buffer.from(event.body, "base64");
+                if (event && event.pathParameters) {
+
+                    const client = new aws.sdk.DynamoDB.DocumentClient()
+                    const base64String = event.pathParameters.proxy
+
+                    const buff = Buffer.from(base64String, "base64");
                     const eventBodyStr = buff.toString('UTF-8');
                     const eventBody = JSON.parse(eventBodyStr);
 
@@ -169,8 +174,8 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
                             statusCode: 200,
                             headers: Headers,
                             body: JSON.stringify({
-                                "status" : "ok",
-                                "username" : eventBody.username
+                                "status": "ok",
+                                "username": eventBody.username
                             }),
                         }
 
@@ -179,14 +184,14 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
                 }
 
                 return {
-                    statusCode: 400,
+                    statusCode: 200,
                     headers: Headers,
                     body: JSON.stringify({
                         status: "error",
-                        message: "Invalid Payload"
+                        message: "Invalid Input"
                     }),
                 }
-            }
+            },
         }
     ]
 });
