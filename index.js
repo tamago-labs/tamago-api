@@ -89,6 +89,35 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
             }
         },
         {
+            method: "GET", path: "/bsc/{proxy+}", eventHandler: async (event) => {
+
+                if (event && event.pathParameters) {
+                    const tokenId = event.pathParameters.proxy
+                    if (["1", "2", "3"].indexOf(tokenId) !== -1) {
+                        return {
+                            statusCode: 200,
+                            headers: Headers,
+                            body: JSON.stringify({
+                                name: "Lucky Red Envelope NFT on BSC",
+                                description: "The first value-backed NFT from Tamago Finance, each presents the specific amount of USD and backs by the value of PancakeSwap LP tokens",
+                                external_url: "https://tamago.finance",
+                                image: `https://img.tamago.finance/lucky-red-envelope/bsc/${tokenId}.png`
+                            }),
+                        }
+                    }
+                }
+
+                return {
+                    statusCode: 200,
+                    headers: Headers,
+                    body: JSON.stringify({
+                        status: "error",
+                        message: "Invalid ID"
+                    }),
+                }
+            }
+        },
+        {
             method: "GET", path: "/account/{proxy+}", eventHandler: async (event) => {
 
                 if (event && event.pathParameters) {
