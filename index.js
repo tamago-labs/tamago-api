@@ -3,6 +3,8 @@ const pulumi = require("@pulumi/pulumi");
 const aws = require("@pulumi/aws");
 const awsx = require("@pulumi/awsx");
 
+const { mainnet , polygon, bsc } = require("./routes")
+
 const Headers = {
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Allow-Origin": "*",
@@ -31,62 +33,19 @@ const dataTable = new aws.dynamodb.Table(
 const angpowApi = new awsx.apigateway.API("angpow-api", {
     routes: [
         {
-            method: "GET", path: "/{proxy+}", eventHandler: async (event) => {
-
-                if (event && event.pathParameters) {
-                    const tokenId = event.pathParameters.proxy
-                    if (["1", "2", "3"].indexOf(tokenId) !== -1) {
-                        return {
-                            statusCode: 200,
-                            headers: Headers,
-                            body: JSON.stringify({
-                                name: "Lucky Red Envelope NFT collection from Tamago Finance, each presents the specific amount of USD and backs by the value of SushiSwap LP tokens",
-                                description: "The first value-backed NFT",
-                                external_url: "https://tamago.finance",
-                                image: `https://img.tamago.finance/lucky-red-envelope/${tokenId}.png`
-                            }),
-                        }
-                    }
-                }
-
-                return {
-                    statusCode: 400,
-                    headers: Headers,
-                    body: JSON.stringify({
-                        status: "error",
-                        message: "Invalid ID"
-                    }),
-                }
-            }
+            method: "GET", 
+            path: "/{proxy+}", 
+            eventHandler: async (event) => await mainnet(event)
         },
         {
-            method: "GET", path: "/polygon/{proxy+}", eventHandler: async (event) => {
-
-                if (event && event.pathParameters) {
-                    const tokenId = event.pathParameters.proxy
-                    if (["1", "2", "3"].indexOf(tokenId) !== -1) {
-                        return {
-                            statusCode: 200,
-                            headers: Headers,
-                            body: JSON.stringify({
-                                name: "Lucky Red Envelope NFT on Polygon",
-                                description: "The first value-backed NFT from Tamago Finance, each presents the specific amount of USD and backs by the value of QuickSwap LP tokens",
-                                external_url: "https://tamago.finance",
-                                image: `https://img.tamago.finance/lucky-red-envelope/polygon/${tokenId}.png`
-                            }),
-                        }
-                    }
-                }
-
-                return {
-                    statusCode: 200,
-                    headers: Headers,
-                    body: JSON.stringify({
-                        status: "error",
-                        message: "Invalid ID"
-                    }),
-                }
-            }
+            method: "GET", 
+            path: "/polygon/{proxy+}", 
+            eventHandler: async (event) => await polygon(event)
+        },
+        {
+            method: "GET", 
+            path: "/bsc/{proxy+}", 
+            eventHandler: async (event) => await bsc(event)
         },
         {
             method: "GET", path: "/account/{proxy+}", eventHandler: async (event) => {
