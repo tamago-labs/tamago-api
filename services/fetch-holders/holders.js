@@ -94,7 +94,7 @@ class Holders {
             }
 
             // uncomment to print out round data
-            // this.printout(`${this.projectId}_Round_${i+1}_${to$}_${(new Date()).valueOf()}`, JSON.stringify(this.WALLETS))
+            // this.printout(`${this.projectId}_Round_${i+1}_${to}_${(new Date()).valueOf()}`, JSON.stringify(this.WALLETS))
 
             await delay(this.DELAY)
         }
