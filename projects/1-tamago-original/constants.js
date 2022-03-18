@@ -11,6 +11,8 @@ const ASSETS = [
     }
 ]
 
+const IMAGE_URL = "https://img.tamago.finance/luckbox/tamago-original-logo.png"
+
 const ARCHIVE = {
     "0xeD26B14762eDcE1d38e17b94afBb810a441C08e4": {
         "1": 2
@@ -2797,5 +2799,6 @@ module.exports = {
     NAME,
     CHAIN_ID,
     ASSETS,
-    ARCHIVE
+    ARCHIVE,
+    IMAGE_URL
 }
