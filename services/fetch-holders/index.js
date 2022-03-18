@@ -37,6 +37,8 @@ async function run({
             case 137:
                 rpcUrl = process.env.POLYGON_RPC_SERVER
                 break;
+            case 1:
+                rpcUrl = process.env.MAINNET_RPC_SERVER
             default:
                 break;
         }
