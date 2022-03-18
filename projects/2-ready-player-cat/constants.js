@@ -1,13 +1,13 @@
 const ID = 2
-const NAME = "Naga DAO NFT"
-const CHAIN_ID = 137
+const NAME = "Ready Player Cat"
+const CHAIN_ID = 1
 const ASSETS = [
     {
-        address: "0x046976F19a14eE7d06Cb9e983c8142fB2AAc0e5e",
+        address: "0xcdb7c1a6fe7e112210ca548c214f656763e13533",
         is1155: false,
-        useArchive : true,
-        startBlock : 26015581
-        // startBlock: 25465581
+        useArchive : false,
+        // startBlock : 26015581
+        startBlock: 12985378
     }
 ]
 
