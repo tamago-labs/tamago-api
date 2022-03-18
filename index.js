@@ -3,7 +3,7 @@ const pulumi = require("@pulumi/pulumi");
 const aws = require("@pulumi/aws");
 const awsx = require("@pulumi/awsx");
 
-const { mainnet , polygon, bsc } = require("./routes")
+const { mainnet, polygon, bsc } = require("./routes")
 
 const Headers = {
     "Access-Control-Allow-Headers": "Content-Type",
@@ -30,21 +30,40 @@ const dataTable = new aws.dynamodb.Table(
     }
 )
 
+const luckboxTable = new aws.dynamodb.Table(
+    "luckboxTable",
+    {
+        attributes: [
+            {
+                name: "projectId",
+                type: "N"
+            },
+            {
+                name: "timestamp",
+                type: "N"
+            }
+        ],
+        hashKey: "projectId",
+        rangeKey: "timestamp",
+        billingMode: "PAY_PER_REQUEST"
+    }
+)
+
 const angpowApi = new awsx.apigateway.API("angpow-api", {
     routes: [
         {
-            method: "GET", 
-            path: "/{proxy+}", 
+            method: "GET",
+            path: "/{proxy+}",
             eventHandler: async (event) => await mainnet(event)
         },
         {
-            method: "GET", 
-            path: "/polygon/{proxy+}", 
+            method: "GET",
+            path: "/polygon/{proxy+}",
             eventHandler: async (event) => await polygon(event)
         },
         {
-            method: "GET", 
-            path: "/bsc/{proxy+}", 
+            method: "GET",
+            path: "/bsc/{proxy+}",
             eventHandler: async (event) => await bsc(event)
         },
         {
@@ -155,6 +174,25 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
     ]
 });
 
+const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
+    routes: [
+        {
+            method: "GET",
+            path: "/",
+            eventHandler: async (event) => {
+                return {
+                    statusCode: 200,
+                    headers: Headers,
+                    body: JSON.stringify({
+                        status: "error",
+                        message: "hello from me!"
+                    }),
+                }
+            }
+        }
+    ]
+})
+
 const domainName = "api.tamago.finance";
 const route53DomainZoneId = "Z0280059321XPD7H3US7L";
 const certARN = "arn:aws:acm:us-east-1:057386374967:certificate/293cdab5-5dda-48bc-a120-4c96c9dd7dab";
@@ -171,6 +209,13 @@ const mapping = new aws.apigateway.BasePathMapping("mapping", {
     domainName: domain.domainName,
 });
 
+const mapping2 = new aws.apigateway.BasePathMapping("mapping-2", {
+    restApi: LuckboxApi.restAPI,
+    basePath: "v2",
+    stageName: LuckboxApi.stage.stageName,
+    domainName: domain.domainName,
+});
+
 const record = new aws.route53.Record("record", {
     type: "A",
     zoneId: route53DomainZoneId,
@@ -182,6 +227,7 @@ const record = new aws.route53.Record("record", {
     }],
 });
 
+exports.luckboxTable = luckboxTable.name
 
 
 
