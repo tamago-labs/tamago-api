@@ -120,9 +120,9 @@ async function Poll(callback) {
 
         const executionParameters = {
             pollingDelay: 60 * 10,
-            queryDelay: 15,
+            queryDelay: 40,
             queryInterval: {
-                137: 50000,
+                137: 40000,
                 1: 4000
             },
             saveToDb: false,
