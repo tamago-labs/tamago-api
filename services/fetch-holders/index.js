@@ -4,10 +4,17 @@ require("dotenv").config();
 const retry = require("async-retry");
 const logger = require('loglevel');
 
+var AWS = require('aws-sdk');
+
+AWS.config.loadFromPath('./config.json');
+
 logger.enableAll()
 
 const { Holders } = require("./holders")
 const { delay, getProvider } = require("../")
+
+// Create DynamoDB document client
+const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
 
 async function run({
     pollingDelay,
@@ -15,7 +22,9 @@ async function run({
     queryInterval,
     errorRetries,
     errorRetriesTimeout,
-    project
+    project,
+    saveToDb,
+    dbTableName
 }) {
 
     try {
@@ -43,7 +52,7 @@ async function run({
             provider,
             queryDelay,
             queryInterval,
-            projectId : ID,
+            projectId: ID,
             assets: ASSETS,
             chainId: CHAIN_ID,
             archive: ARCHIVE
@@ -60,7 +69,19 @@ async function run({
 
                     logger.debug(`Total holders for the collection : ${currentHolders.length} `)
 
-                    // FIXME : upload to DB
+                    if (saveToDb) {
+                        const Item = {
+                            projectId: Number(ID),
+                            timestamp: Math.floor(new Date().valueOf() / 1000),
+                            holders: currentHolders
+                        };
+
+                        const TableName = `${dbTableName}`
+
+                        logger.debug(`Saving the holder list to DynamoDB table - ${TableName}`)
+
+                        await docClient.put({ TableName, Item }).promise();
+                    }
 
                 },
                 {
@@ -96,15 +117,17 @@ async function Poll(callback) {
         }
 
         const executionParameters = {
-            pollingDelay: 60,
+            pollingDelay: 60 * 10,
             queryDelay: 15,
-            queryInterval : {
+            queryInterval: {
                 137: 50000,
                 1: 4000
             },
+            saveToDb: false,
+            dbTableName : "luckboxTable-5693aad",
             errorRetries: 5,
             errorRetriesTimeout: 10,
-            project : args[0] // 1-tamago-original
+            project: args[0] // 1-tamago-original
         }
 
         await run({ ...executionParameters });
