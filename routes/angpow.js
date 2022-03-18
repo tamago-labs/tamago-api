@@ -1,11 +1,7 @@
 const aws = require("@pulumi/aws");
 const awsx = require("@pulumi/awsx");
 
-const Headers = {
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
-}
+const { headers } = require("./")
 
 exports.mainnet = async (event) => {
 
@@ -14,7 +10,7 @@ exports.mainnet = async (event) => {
         if (["1", "2", "3"].indexOf(tokenId) !== -1) {
             return {
                 statusCode: 200,
-                headers: Headers,
+                headers,
                 body: JSON.stringify({
                     name: "Lucky Red Envelope NFT collection from Tamago Finance, each presents the specific amount of USD and backs by the value of SushiSwap LP tokens",
                     description: "The first value-backed NFT",
@@ -27,7 +23,7 @@ exports.mainnet = async (event) => {
 
     return {
         statusCode: 400,
-        headers: Headers,
+        headers,
         body: JSON.stringify({
             status: "error",
             message: "Invalid ID"
@@ -43,7 +39,7 @@ exports.polygon = async (event) => {
         if (["1", "2", "3"].indexOf(tokenId) !== -1) {
             return {
                 statusCode: 200,
-                headers: Headers,
+                headers,
                 body: JSON.stringify({
                     name: "Lucky Red Envelope NFT on Polygon",
                     description: "The first value-backed NFT from Tamago Finance, each presents the specific amount of USD and backs by the value of QuickSwap LP tokens",
@@ -56,7 +52,7 @@ exports.polygon = async (event) => {
 
     return {
         statusCode: 200,
-        headers: Headers,
+        headers,
         body: JSON.stringify({
             status: "error",
             message: "Invalid ID"
@@ -71,7 +67,7 @@ exports.bsc = async (event) => {
         if (["1", "2", "3"].indexOf(tokenId) !== -1) {
             return {
                 statusCode: 200,
-                headers: Headers,
+                headers,
                 body: JSON.stringify({
                     name: "Lucky Red Envelope NFT on BSC",
                     description: "The first value-backed NFT from Tamago Finance, each presents the specific amount of USD and backs by the value of PancakeSwap LP tokens",
@@ -84,7 +80,7 @@ exports.bsc = async (event) => {
 
     return {
         statusCode: 200,
-        headers: Headers,
+        headers,
         body: JSON.stringify({
             status: "error",
             message: "Invalid ID"

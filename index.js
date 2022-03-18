@@ -3,7 +3,7 @@ const pulumi = require("@pulumi/pulumi");
 const aws = require("@pulumi/aws");
 const awsx = require("@pulumi/awsx");
 
-const { mainnet, polygon, bsc } = require("./routes")
+const { mainnet, polygon, bsc, getAllProjects, getProject } = require("./routes")
 
 const Headers = {
     "Access-Control-Allow-Headers": "Content-Type",
@@ -178,17 +178,13 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
     routes: [
         {
             method: "GET",
-            path: "/",
-            eventHandler: async (event) => {
-                return {
-                    statusCode: 200,
-                    headers: Headers,
-                    body: JSON.stringify({
-                        status: "error",
-                        message: "hello from me!"
-                    }),
-                }
-            }
+            path: "/projects",
+            eventHandler: async (event) => await getAllProjects(event)
+        },
+        {
+            method: "GET",
+            path: "/projects/{proxy+}",
+            eventHandler: async (event) => await getProject(event, luckboxTable.name.get())
         }
     ]
 })
