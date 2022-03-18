@@ -1,7 +1,9 @@
 
+const fs = require('fs')
 const { ethers } = require("ethers")
 const { delay } = require("..")
 const { ERC721_ABI, ERC1155_ABI } = require("../../abi")
+
 
 class Holders {
 
@@ -91,11 +93,14 @@ class Holders {
                 await this.parseTransactionsErc721(from, to)
             }
 
+            // uncomment to print out round data
+            // this.printout(`${this.projectId}_Round_${i+1}_${(new Date()).valueOf()}`, JSON.stringify(this.WALLETS))
+
             await delay(this.DELAY)
         }
 
         // uncomment to print out archive data
-        // console.log(JSON.stringify(this.WALLETS))
+        // this.printout(`${this.projectId}_Final_${(new Date()).valueOf()}`, JSON.stringify(this.WALLETS))
     }
 
     async parseTransactionsErc721(fromBlock, toBlock) {
@@ -179,6 +184,16 @@ class Holders {
 
     getRawHolders() {
         return this.WALLETS
+    }
+
+    printout(filename, content) {
+        fs.writeFile(`${process.cwd()}/${filename}.txt`, content, { flag: 'w+' }, err => {
+            if (err) {
+                this.logger.error(`${err.message}`)
+                return
+            }
+            //file written successfully
+        })
     }
 
 }
