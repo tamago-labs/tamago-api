@@ -14,7 +14,7 @@ projects = projects.map(project => {
         projectId: ID,
         name: NAME,
         description: DESCRIPTION,
-        chainid: CHAIN_ID,
+        chainId: CHAIN_ID,
         assets: ASSETS,
         imageUrl: IMAGE_URL
     }
