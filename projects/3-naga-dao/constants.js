@@ -13,6 +13,8 @@ const ASSETS = [
 
 const IMAGE_URL = "https://img.tamago.finance/luckbox/naga-dao-logo.png"
 
+const DESCRIPTION = "The NFT collection aims to support NFT artist via its incubation program, the NFT is exclusively distributed to the team and supporter activities."
+
 const ARCHIVE = {
     "0x5B35999Dd1E5BEe0A9b2519308830ad5F9a47cEe": {
         "6": 1,
@@ -787,5 +789,6 @@ module.exports = {
     CHAIN_ID,
     ASSETS,
     ARCHIVE,
-    IMAGE_URL
+    IMAGE_URL,
+    DESCRIPTION
 }

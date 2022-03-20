@@ -13,6 +13,8 @@ const ASSETS = [
 
 const IMAGE_URL = "https://img.tamago.finance/luckbox/tamago-original-logo.png"
 
+const DESCRIPTION = "The first NFT collection from Tamago Finance contributed to early supporters, made only 1,000 units."
+
 const ARCHIVE = {
     "0xeD26B14762eDcE1d38e17b94afBb810a441C08e4": {
         "1": 2
@@ -2800,5 +2802,6 @@ module.exports = {
     CHAIN_ID,
     ASSETS,
     ARCHIVE,
-    IMAGE_URL
+    IMAGE_URL,
+    DESCRIPTION
 }

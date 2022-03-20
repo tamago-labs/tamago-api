@@ -13,6 +13,8 @@ const ASSETS = [
 
 const IMAGE_URL = "https://img.tamago.finance/luckbox/rpc-logo.png"
 
+const DESCRIPTION = "RPC Genesis is a curated collection of 5,000 unique RPC NFTs on the Ethereum blockchain that also represent MAO DAO membership."
+
 const ARCHIVE = {
     "0x3F74Bb8a8FC7AE47fA309F1b54f484d7be538a45": {
       "125": 1,
@@ -27574,5 +27576,6 @@ module.exports = {
     CHAIN_ID,
     ASSETS,
     ARCHIVE,
-    IMAGE_URL
+    IMAGE_URL,
+    DESCRIPTION
 }

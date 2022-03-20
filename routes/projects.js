@@ -9,10 +9,11 @@ const { headers } = require("./")
 let projects = config.getObject("projects") || []
 
 projects = projects.map(project => {
-    const { ID, NAME, CHAIN_ID, ASSETS, IMAGE_URL } = require(`../projects/${project}/constants`)
+    const { ID, NAME, CHAIN_ID, ASSETS, IMAGE_URL, DESCRIPTION } = require(`../projects/${project}/constants`)
     return {
         projectId: ID,
         name: NAME,
+        description: DESCRIPTION,
         chainid: CHAIN_ID,
         assets: ASSETS,
         imageUrl: IMAGE_URL
@@ -72,12 +73,21 @@ const getProject = async (event, tableName) => {
             const { Items } = await client.query(params).promise()
 
             if (Items && Items.length > 0) {
+
+                let lastItem = Items[Items.length-1]
+                lastItem.holders = lastItem.holders.length
+                const extend = projects.find( item => Number(item.projectId) === Number(projectId))
+
                 return {
                     statusCode: 200,
                     headers,
                     body: JSON.stringify({
                         status: "ok",
-                        ...lastItem
+                        name : extend.name,
+                        description : extend.description,
+                        chainId : extend.chainId,
+                        imageUrl : extend.imageUrl,
+                        ...lastItem,
                     }),
                 }
             }
