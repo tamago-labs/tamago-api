@@ -3,7 +3,7 @@ const pulumi = require("@pulumi/pulumi");
 const aws = require("@pulumi/aws");
 const awsx = require("@pulumi/awsx");
 
-const { mainnet, polygon, bsc, getAllProjects, getProject } = require("./routes")
+const { mainnet, polygon, bsc, getAllProjects, getProject, getAllEvents } = require("./routes")
 
 const Headers = {
     "Access-Control-Allow-Headers": "Content-Type",
@@ -30,8 +30,8 @@ const dataTable = new aws.dynamodb.Table(
     }
 )
 
-const luckboxTable = new aws.dynamodb.Table(
-    "luckboxTable",
+const projectTable = new aws.dynamodb.Table(
+    "projectTable",
     {
         attributes: [
             {
@@ -184,8 +184,13 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
         {
             method: "GET",
             path: "/projects/{proxy+}",
-            eventHandler: async (event) => await getProject(event, luckboxTable.name.get())
-        }
+            eventHandler: async (event) => await getProject(event, projectTable.name.get())
+        },
+        {
+            method: "GET",
+            path: "/events",
+            eventHandler: async (event) => await getAllEvents(event, dataTable.name.get())
+        },
     ]
 })
 
@@ -223,7 +228,7 @@ const record = new aws.route53.Record("record", {
     }],
 });
 
-exports.luckboxTable = luckboxTable.name
+exports.projectTable = projectTable.name
 
 
 

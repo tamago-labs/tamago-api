@@ -1,5 +1,7 @@
 const { mainnet , polygon, bsc } = require("./angpow")
 const { getAllProjects, getProject } = require("./projects")
+const { getAllEvents } = require("./events")
+
 
 const headers = {
     "Access-Control-Allow-Headers": "Content-Type",
@@ -13,5 +15,6 @@ module.exports = {
     bsc,
     headers,
     getAllProjects,
-    getProject
+    getProject,
+    getAllEvents
 }
