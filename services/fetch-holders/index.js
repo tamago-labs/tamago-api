@@ -64,39 +64,39 @@ async function run({
 
         while (infinite || count === 0) {
             await retry(
-                // async () => {
+                async () => {
 
-                //     // Update holders data
-                //     await holders.update()
+                    // Update holders data
+                    await holders.update()
 
-                //     const currentHolders = holders.getHolders()
+                    const currentHolders = holders.getHolders()
 
-                //     logger.debug(`Total holders for the collection : ${currentHolders.length} `)
+                    logger.debug(`Total holders for the collection : ${currentHolders.length} `)
 
-                //     if (saveToDb) {
-                //         const Item = {
-                //             projectId: Number(ID),
-                //             timestamp: Math.floor(new Date().valueOf() / 1000),
-                //             holders: currentHolders
-                //         };
+                    if (saveToDb) {
+                        const Item = {
+                            projectId: Number(ID),
+                            timestamp: Math.floor(new Date().valueOf() / 1000),
+                            holders: currentHolders
+                        };
 
-                //         const TableName = `${dbTableName}`
+                        const TableName = `${dbTableName}`
 
-                //         logger.debug(`Saving the holder list to DynamoDB table - ${TableName}`)
+                        logger.debug(`Saving the holder list to DynamoDB table - ${TableName}`)
 
-                //         await docClient.put({ TableName, Item }).promise();
-                //     }
+                        await docClient.put({ TableName, Item }).promise();
+                    }
 
-                // },
-                // {
-                //     retries: errorRetries,
-                //     minTimeout: errorRetriesTimeout * 1000, // delay between retries in ms
-                //     randomize: false,
-                //     onRetry: error => {
-                //         console.log(error)
-                //         logger.debug(error.message)
-                //     }
-                // }
+                },
+                {
+                    retries: errorRetries,
+                    minTimeout: errorRetriesTimeout * 1000, // delay between retries in ms
+                    randomize: false,
+                    onRetry: error => {
+                        console.log(error)
+                        logger.debug(error.message)
+                    }
+                }
             );
 
             logger.debug("End of execution loop - waiting polling delay")
