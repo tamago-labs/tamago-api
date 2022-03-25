@@ -12,6 +12,8 @@ class Holders {
         1: 5000
     }
 
+    BURNT_ADDRESSES = ["0x000000000000000000000000000000000000dEaD" , "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000001"]
+
     WALLETS = {}
 
     /*
@@ -174,7 +176,7 @@ class Holders {
                 }
             }
 
-            if (itemCount !== 0) {
+            if (itemCount !== 0 && this.isNotBurnAddress(item)) {
                 output.push(item)
             }
 
@@ -184,6 +186,10 @@ class Holders {
 
     getRawHolders() {
         return this.WALLETS
+    }
+
+    isNotBurnAddress(address) {
+        return (this.BURNT_ADDRESSES.map(item => item.toLowerCase()).indexOf(address.toLowerCase()) === -1)
     }
 
     printout(filename, content) {
