@@ -18,6 +18,7 @@ const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
 
 async function run({
     pollingDelay,
+    infinite,
     queryDelay,
     queryInterval,
     errorRetries,
@@ -32,6 +33,7 @@ async function run({
         const { CHAIN_ID, ID, ASSETS, ARCHIVE } = require(`../../projects/${project}/constants`)
 
         let rpcUrl
+        let count = 0
 
         switch (CHAIN_ID) {
             case 137:
@@ -60,7 +62,7 @@ async function run({
             archive: ARCHIVE
         })
 
-        while (true) {
+        while (infinite || count === 0) {
             await retry(
                 async () => {
 
@@ -99,7 +101,9 @@ async function run({
 
             logger.debug("End of execution loop - waiting polling delay")
 
+
             await delay(Number(pollingDelay));
+            count += 1;
         }
 
     } catch (error) {
@@ -113,7 +117,7 @@ async function Poll(callback) {
     try {
 
         const args = process.argv.slice(2);
-
+        console.log("args==> ", args)
         if (!args[0]) {
             throw new Error("Please provide your project key, ex. 'yarn run fetch-holders 1-tamago-original'")
         }
@@ -126,7 +130,8 @@ async function Poll(callback) {
                 1: 4000
             },
             saveToDb: false,
-            dbTableName : "luckboxTable-5693aad",
+            infinite: false,
+            dbTableName: "luckboxTable-5693aad",
             errorRetries: 5,
             errorRetriesTimeout: 10,
             project: args[0] // 1-tamago-original
