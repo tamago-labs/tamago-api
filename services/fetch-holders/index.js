@@ -129,7 +129,7 @@ async function Poll(callback) {
                 137: 40000,
                 1: 4000
             },
-            saveToDb: true,
+            saveToDb: false,
             dbTableName : "projectTable-062b570",
             errorRetries: 5,
             errorRetriesTimeout: 10,
