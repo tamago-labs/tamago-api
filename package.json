@@ -14,6 +14,7 @@
         "sha3": "^2.1.4"
     },
     "scripts": {
-        "fetch-holders": "node ./services/fetch-holders/index.js"
+        "fetch-holders": "node ./services/fetch-holders/index.js",
+        "fetch-holders-all": "pm2 start ecosystem.config.js"
     }
 }
