@@ -103,7 +103,7 @@ const getProject = async (event, tableName) => {
                         chainId: extend.chainId,
                         imageUrl: extend.imageUrl,
                         total: extend.total || 0,
-                        ...lastItem,
+                        ...lastItem
                     }),
                 }
             }

@@ -1,8 +1,11 @@
 const pulumi = require("@pulumi/pulumi");
 const aws = require("@pulumi/aws");
 const awsx = require("@pulumi/awsx");
+const { ethers } = require("ethers");
 
 const { headers } = require("./")
+const { LUCKBOX_ABI } = require("../abi")
+const { finalizeWinners } = require("../utils")
 
 const getAllEvents = async (event, tableName) => {
 
@@ -45,7 +48,7 @@ const getAllEvents = async (event, tableName) => {
 }
 
 
-const getEvent = async (event, { dataTable , projectTable}) => {
+const getEvent = async (event, { dataTable, projectTable }) => {
     try {
 
         if (event && event.pathParameters) {
@@ -62,6 +65,8 @@ const getEvent = async (event, { dataTable , projectTable}) => {
             };
 
             const { Item } = await client.get(params).promise()
+
+            let snapshotTimestamp
 
             if (Item) {
 
@@ -94,6 +99,8 @@ const getEvent = async (event, { dataTable , projectTable}) => {
                     const lastItem = Items[Items.length - 1]
                     const { holders } = lastItem
 
+                    snapshotTimestamp = lastItem.timestamp
+
                     participants = participants.concat(holders)
                 }
 
@@ -105,29 +112,70 @@ const getEvent = async (event, { dataTable , projectTable}) => {
 
                 switch (Number(Item.chainId)) {
                     case 137:
-                        rpcUrl = process.env.POLYGON_RPC_SERVER
+                        rpcUrl = process.env.POLYGON_RPC_SERVER || "https://polygon-mainnet.g.alchemy.com/v2/jucVpnvhzklnSjwTPXs5sTdz3IkIELwx"
                         break;
                     case 1:
-                        rpcUrl = process.env.MAINNET_RPC_SERVER
+                        rpcUrl = process.env.MAINNET_RPC_SERVER || "https://nd-454-395-901.p2pify.com/aa03c13657e5ccc30a12bba624297b80"
                     default:
                         break;
                 }
 
-                // if (rpcUrl) {
-                //     const provider = ethers.providers.JsonRpcProvider(rpcUrl)
-                    
-                //     const luckboxContract = 
+                let onchainData
+                let rewards = []
 
-                // }
+                if (rpcUrl && Item.rewardContract) {
+                    const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
+                    const luckboxContract = new ethers.Contract(Item.rewardContract, LUCKBOX_ABI, provider)
+
+                    const eventInfo = await luckboxContract.events(eventId)
+
+                    console.log("eventInfo --> ", eventInfo)
+
+                    onchainData = {
+                        resultAttached: eventInfo['merkleRoot'] !== "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        totalClaim: eventInfo['claimCount'].toString(),
+                        eventEnded: eventInfo['ended'],
+                        seedNumber: eventInfo['seed'].toString(),
+                        winners: finalizeWinners({
+                            rewards: Item.rewards,
+                            participants,
+                            seedNumber: eventInfo['seed'].toString()
+                        })
+                    }
+
+                    if (onchainData && onchainData.seedNumber !== "0" && onchainData.winners && onchainData.winners.length > 0) {
+
+                        const getAsset = async (item) => {
+
+                            const assetInfo = await luckboxContract.poaps(item[0])
+
+                            return {
+                                "rewardId": item[0],
+                                "assetAddress": assetInfo[0],
+                                "winnerAddress": item[1],
+                                "tokenId": assetInfo[1].toString(),
+                                "assetIs1155": assetInfo[2]
+                            }
+                        }
+
+                        onchainData.winners = await Promise.all(onchainData.winners.map(item => getAsset(item)))
+
+                    } else {
+                        onchainData.winners = []
+                    }
+
+                }
 
                 return {
                     statusCode: 200,
                     headers,
                     body: JSON.stringify({
-                        status: "ok", 
+                        status: "ok",
                         ...Item,
-                        participants : participants.length,
-                        rpcUrl
+                        participants: participants.length,
+                        rewards,
+                        ...onchainData,
+                        snapshotTimestamp
                     }),
                 }
             }
