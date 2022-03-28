@@ -123,6 +123,9 @@ async function Poll(callback) {
         if (!args[0]) {
             throw new Error("Please provide your project key, ex. 'yarn run fetch-holders 1-tamago-original'")
         }
+        if (!process.env.DB_TABLE_NAME) {
+            throw new Error('dbTableName is required.')
+        }
 
         const executionParameters = {
             pollingDelay: Number(process.env.POLLING_DELAY) || 60 * (60 * 6),
@@ -136,9 +139,7 @@ async function Poll(callback) {
             project: args[0] // 1-tamago-original
         }
 
-        if (executionParameters.saveToDb && !executionParameters.dbTableName) {
-            throw new Error('dbTableName is required.')
-        }
+
 
         await run({ ...executionParameters });
 
