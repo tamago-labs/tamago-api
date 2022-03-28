@@ -136,7 +136,7 @@ async function Poll(callback) {
             project: args[0] // 1-tamago-original
         }
 
-        if (!executionParameters.dbTableName) {
+        if (executionParameters.saveToDb && !executionParameters.dbTableName) {
             throw new Error('dbTableName is required.')
         }
 
