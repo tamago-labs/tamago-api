@@ -62,7 +62,7 @@ async function run({
             archive: ARCHIVE
         })
 
-        while (true) {
+        while (infinite || count === 0) {
             await retry(
                 async () => {
 
@@ -102,8 +102,9 @@ async function run({
             logger.debug("End of execution loop - waiting polling delay")
 
             count += 1;
-            // console.table({ infinite, count })
+          
             if (infinite !== true && count > 0) {
+                logger.debug("Exiting...")
                 break
             }
             await delay(Number(pollingDelay));
