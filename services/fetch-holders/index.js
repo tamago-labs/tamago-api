@@ -101,8 +101,13 @@ async function run({
 
             logger.debug("End of execution loop - waiting polling delay")
 
-            await delay(Number(pollingDelay));
             count += 1;
+          
+            if (infinite !== true && count > 0) {
+                logger.debug("Exiting...")
+                break
+            }
+            await delay(Number(pollingDelay));
         }
 
     } catch (error) {
