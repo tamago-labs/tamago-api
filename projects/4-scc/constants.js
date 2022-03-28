@@ -10,6 +10,8 @@ const ASSETS = [
   }
 ]
 
+const TOTAL_ITEMS = 152
+
 const IMAGE_URL = "https://img.tamago.finance/luckbox/scc-logo.jpg"
 
 const DESCRIPTION = "SCC is a collector club in the NFT world. SCC Card means a membership in the club. SCC Card holders can participate in exclusive events such as NFT claims, raffles, community giveaways, and more."
@@ -769,5 +771,6 @@ module.exports = {
   ASSETS,
   ARCHIVE,
   IMAGE_URL,
-  DESCRIPTION
+  DESCRIPTION,
+  TOTAL_ITEMS
 }

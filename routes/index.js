@@ -1,6 +1,6 @@
 const { mainnet , polygon, bsc } = require("./angpow")
 const { getAllProjects, getProject } = require("./projects")
-const { getAllEvents } = require("./events")
+const { getAllEvents, getEvent } = require("./events")
 
 
 const headers = {
@@ -16,5 +16,6 @@ module.exports = {
     headers,
     getAllProjects,
     getProject,
-    getAllEvents
+    getAllEvents,
+    getEvent
 }

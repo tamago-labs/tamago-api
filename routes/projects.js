@@ -9,14 +9,15 @@ const { headers } = require("./")
 let projects = config.getObject("projects") || []
 
 projects = projects.map(project => {
-    const { ID, NAME, CHAIN_ID, ASSETS, IMAGE_URL, DESCRIPTION } = require(`../projects/${project}/constants`)
+    const { ID, NAME, CHAIN_ID, ASSETS, IMAGE_URL, DESCRIPTION, TOTAL_ITEMS } = require(`../projects/${project}/constants`)
     return {
         projectId: ID,
         name: NAME,
         description: DESCRIPTION,
         chainId: CHAIN_ID,
         assets: ASSETS,
-        imageUrl: IMAGE_URL
+        imageUrl: IMAGE_URL,
+        total: TOTAL_ITEMS
     }
 })
 
@@ -53,7 +54,16 @@ const getProject = async (event, tableName) => {
             const projectId = event.pathParameters.proxy
             const client = new aws.sdk.DynamoDB.DocumentClient()
 
-            const currentTimestamp =  Math.floor(new Date().valueOf() / 1000)
+            let currentTimestamp = Math.floor(new Date().valueOf() / 1000)
+            let attachedList = false
+
+            if (event.queryStringParameters && event.queryStringParameters.timestamp) {
+                currentTimestamp = Number(event.queryStringParameters.timestamp)   
+            }
+            if (event.queryStringParameters && event.queryStringParameters.holderlist) {
+                attachedList = event.queryStringParameters.holderlist === "yes" ? true : false
+            }
+
             const lastWeekTimestamp = currentTimestamp - (86400 * 7)
 
             const params = {
@@ -74,19 +84,25 @@ const getProject = async (event, tableName) => {
 
             if (Items && Items.length > 0) {
 
-                let lastItem = Items[Items.length-1]
+                let lastItem = Items[Items.length - 1]
+                const holderList = lastItem.holders
                 lastItem.holders = lastItem.holders.length
-                const extend = projects.find( item => Number(item.projectId) === Number(projectId))
+                const extend = projects.find(item => Number(item.projectId) === Number(projectId))
+
+                if (attachedList) {
+                    lastItem['holderList'] = holderList
+                }
 
                 return {
                     statusCode: 200,
                     headers,
                     body: JSON.stringify({
                         status: "ok",
-                        name : extend.name,
-                        description : extend.description,
-                        chainId : extend.chainId,
-                        imageUrl : extend.imageUrl,
+                        name: extend.name,
+                        description: extend.description,
+                        chainId: extend.chainId,
+                        imageUrl: extend.imageUrl,
+                        total: extend.total || 0,
                         ...lastItem,
                     }),
                 }
