@@ -125,14 +125,14 @@ async function Poll(callback) {
         }
 
         const executionParameters = {
-            pollingDelay: 60 * 10,
+            pollingDelay: 60 * (60 * 6),
             queryDelay: 40,
             queryInterval: {
                 137: 40000,
                 1: 4000
             },
             saveToDb: false,
-            dbTableName : "projectTable-062b570",
+            dbTableName: "projectTable-062b570",
             errorRetries: 5,
             errorRetriesTimeout: 10,
             project: args[0] // 1-tamago-original
