@@ -14,7 +14,7 @@ The current version of the API lives at ```https://api.tamago.finance/v2```.
 | Endpoint | What it does |
 | ------------- | -------------|
 | ```/projects``` | Returns an array of Projects  
-| ```/projects/{id}``` | Returns an object of the project from the given project ID. (Example: to retrive the holder list from 22/3/2022 using /projects/1?holderlist=yes&timestamp=1648166400)
+| ```/projects/{id}``` | Returns an object of the project from the given project ID. (Example: to retrieve the holder list from 22/3/2022 using /projects/1?holderlist=yes&timestamp=1648166400)
 | ```/events``` | Returns an array of Events  
 | ```/events/{id}``` | Returns an object of the event from the given event ID.
 
