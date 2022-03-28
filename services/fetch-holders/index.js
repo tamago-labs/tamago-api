@@ -101,11 +101,13 @@ async function run({
 
             logger.debug("End of execution loop - waiting polling delay")
 
-            if (infinite === false && count > 0) {
-                break
-            }
+
             await delay(Number(pollingDelay));
             count += 1;
+            // console.table({ infinite, count })
+            if (infinite !== true && count > 0) {
+                break
+            }
         }
 
     } catch (error) {
