@@ -125,20 +125,23 @@ async function Poll(callback) {
         if (!args[0]) {
             throw new Error("Please provide your project key, ex. 'yarn run fetch-holders 1-tamago-original'")
         }
+        if (!process.env.DB_TABLE_NAME) {
+            throw new Error('dbTableName is required.')
+        }
 
         const executionParameters = {
-            pollingDelay: 60 * (60 * 6),
-            queryDelay: 40,
-            queryInterval: {
-                137: 40000,
-                1: 4000
-            },
-            saveToDb: false,
-            dbTableName: "projectTable-062b570",
-            errorRetries: 5,
-            errorRetriesTimeout: 10,
+            pollingDelay: Number(process.env.POLLING_DELAY) || 60 * (60 * 6),
+            queryDelay: Number(process.env.QUERY_DELAY) || 40,
+            queryInterval: { 137: 40000, 1: 4000 },
+            saveToDb: (process.env.SAVE_TO_DB === "true" ? true : false),
+            infinite: (process.env.INFINITE === "true" ? true : false),
+            dbTableName: process.env.DB_TABLE_NAME,
+            errorRetries: Number(process.env.ERROR_RETRIES) || 5,
+            errorRetriesTimeout: Number(process.env.ERROR_RETRIES_TIMEOUT) || 10,
             project: args[0] // 1-tamago-original
         }
+
+
 
         await run({ ...executionParameters });
 
