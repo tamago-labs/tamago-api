@@ -3,7 +3,7 @@ const pulumi = require("@pulumi/pulumi");
 const aws = require("@pulumi/aws");
 const awsx = require("@pulumi/awsx");
 
-const { mainnet, polygon, bsc, getAllProjects, getProject, getAllEvents, getEvent } = require("./routes")
+const { mainnet, polygon, bsc, getAllProjects, getProject, getAllEvents, getEvent, generateProof } = require("./routes")
 
 const Headers = {
     "Access-Control-Allow-Headers": "Content-Type",
@@ -195,6 +195,11 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
             method: "GET",
             path: "/events/{proxy+}",
             eventHandler: async (event) => await getEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
+        },
+        {
+            method: "GET",
+            path: "/events/proof/{proxy+}",
+            eventHandler: async (event) => await generateProof(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
         },
     ]
 })
