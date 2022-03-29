@@ -15,7 +15,7 @@ const IMAGE_URL = "https://img.tamago.finance/luckbox/tamago-original-logo.png"
 
 const DESCRIPTION = "The first NFT collection from Tamago Finance contributed to early supporters, made only 1,000 units."
 
-const TOTAL_ITEMS = 864
+const TOTAL_ITEMS = 2
 
 const ARCHIVE = {
     "0xeD26B14762eDcE1d38e17b94afBb810a441C08e4": {

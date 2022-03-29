@@ -1,6 +1,6 @@
 const { ethers } = require("ethers");
 
-const finalizeWinners = ({
+const generateWinners = ({
     rewards,
     participants,
     seedNumber
@@ -27,11 +27,57 @@ const finalizeWinners = ({
         }
     }
 
-    return rewards.map(( rewardId, index) => {
-        return [ rewardId, output[index]]
+    return rewards.map((rewardId, index) => {
+        return [rewardId, output[index]]
     })
 }
 
+const finalizeWinners = async (luckboxContract, { seedNumber, winners }) => {
+    if (seedNumber !== "0" && winners && winners.length > 0) {
+
+        const getAsset = async (item) => {
+
+            const assetInfo = await luckboxContract.poaps(item[0])
+
+            return {
+                "rewardId": item[0],
+                "assetAddress": assetInfo[0],
+                "winnerAddress": item[1],
+                "tokenId": assetInfo[1].toString(),
+                "assetIs1155": assetInfo[2]
+            }
+        }
+
+        return await Promise.all(winners.map(item => getAsset(item)))
+
+    } else {
+        return []
+    }
+}
+
+const getProvider = (chainId = 137) => {
+
+    let rpcUrl
+
+    switch (chainId) {
+        case 137:
+            rpcUrl = process.env.POLYGON_RPC_SERVER || ""
+            break;
+        case 1:
+            rpcUrl = process.env.MAINNET_RPC_SERVER || ""
+        default:
+            break;
+    }
+
+    if (!rpcUrl) {
+        throw new Error("can't find RPC URL configuration for given chain ID")
+    }
+
+    return new ethers.providers.JsonRpcProvider(rpcUrl)
+}
+
 module.exports = {
-    finalizeWinners
+    generateWinners,
+    finalizeWinners,
+    getProvider
 }
