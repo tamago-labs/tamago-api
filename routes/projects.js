@@ -9,7 +9,7 @@ const { headers } = require("./")
 let projects = config.getObject("projects") || []
 
 projects = projects.map(project => {
-    const { ID, NAME, CHAIN_ID, ASSETS, IMAGE_URL, DESCRIPTION, TOTAL_ITEMS } = require(`../projects/${project}/constants`)
+    const { ID, NAME, CHAIN_ID, ASSETS, IMAGE_URL, DESCRIPTION, TOTAL_ITEMS } = require(`../projects/${project}/constants.json`)
     return {
         projectId: ID,
         name: NAME,
@@ -58,7 +58,7 @@ const getProject = async (event, tableName) => {
             let attachedList = false
 
             if (event.queryStringParameters && event.queryStringParameters.timestamp) {
-                currentTimestamp = Number(event.queryStringParameters.timestamp)   
+                currentTimestamp = Number(event.queryStringParameters.timestamp)
             }
             if (event.queryStringParameters && event.queryStringParameters.holderlist) {
                 attachedList = event.queryStringParameters.holderlist === "yes" ? true : false

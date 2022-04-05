@@ -30,7 +30,7 @@ async function run({
 
     try {
 
-        const { CHAIN_ID, ID, ASSETS, ARCHIVE } = require(`../../projects/${project}/constants`)
+        const { CHAIN_ID, ID, ASSETS, ARCHIVE } = require(`../../projects/${project}/constants.json`)
 
         let rpcUrl
         let count = 0
@@ -102,7 +102,7 @@ async function run({
             logger.debug("End of execution loop - waiting polling delay")
 
             count += 1;
-          
+
             if (infinite !== true && count > 0) {
                 logger.debug("Exiting...")
                 break
