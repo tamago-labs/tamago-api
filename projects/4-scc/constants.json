@@ -1,4 +1,5 @@
 {
+    "PATH": "./projects/4-scc/constants.json",
     "ID": 4,
     "NAME": "Smart Collector Card",
     "CHAIN_ID": 1,

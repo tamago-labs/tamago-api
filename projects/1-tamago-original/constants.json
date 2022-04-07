@@ -1,4 +1,5 @@
 {
+    "PATH": "./projects/1-tamago-original/constants.json",
     "ID": 1,
     "NAME": "Tamago Finance Original NFT",
     "CHAIN_ID": 137,

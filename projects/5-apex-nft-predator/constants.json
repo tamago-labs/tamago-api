@@ -1,4 +1,5 @@
 {
+    "PATH": "./projects/5-apex-nft-predator/constants.json",
     "ID": 5,
     "NAME": "ApeX NFT Predator",
     "CHAIN_ID": 1,

@@ -1,4 +1,5 @@
 {
+    "PATH": "./projects/6-cheese-badges-of-honor/constants.json",
     "ID": 6,
     "NAME": "CHEESE Badges of Honor",
     "CHAIN_ID": 1,

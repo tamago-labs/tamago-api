@@ -1,4 +1,5 @@
 {
+    "PATH": "./projects/3-naga-dao/constants.json",
     "ID": 3,
     "NAME": "Naga DAO NFT",
     "CHAIN_ID": 137,

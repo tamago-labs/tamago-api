@@ -1,4 +1,5 @@
 {
+  "PATH": "./projects/2-ready-player-cat/constants.json",
   "ID": 2,
   "NAME": "Ready Player Cat",
   "CHAIN_ID": 1,

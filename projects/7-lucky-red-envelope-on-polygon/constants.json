@@ -1,4 +1,5 @@
 {
+    "PATH": "./projects/7-lucky-red-envelope-on-polygon/constants.json",
     "ID": 7,
     "NAME": "Lucky Red Envelope on Polygon",
     "CHAIN_ID": 137,
