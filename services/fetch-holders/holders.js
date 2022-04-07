@@ -97,7 +97,7 @@ class Holders {
             }
 
             // uncomment to print out round data
-            this.printout(`${this.projectId}_Round_${i + 1}_${to}_${(new Date()).valueOf()}`, JSON.stringify(this.WALLETS))
+            // this.printout(`${this.projectId}_Round_${i + 1}_${to}_${(new Date()).valueOf()}`, JSON.stringify(this.WALLETS))
 
             // uncomment to allow for automatic update the archive and startblock
             this.updateArchiveAndStartBlock(this.path, this.WALLETS, to)
@@ -223,7 +223,7 @@ class Holders {
                 return
             }
         })
-        console.log(`constants.json successfully updated to block${currentBlock}`)
+        console.log(`constants.json successfully updated to block ${currentBlock}`)
     }
 }
 
