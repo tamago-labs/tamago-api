@@ -30,7 +30,7 @@ async function run({
 
     try {
 
-        const { CHAIN_ID, ID, ASSETS, ARCHIVE } = require(`../../projects/${project}/constants.json`)
+        const { CHAIN_ID, ID, ASSETS, ARCHIVE, PATH } = require(`../../projects/${project}/constants.json`)
 
         let rpcUrl
         let count = 0
@@ -59,7 +59,8 @@ async function run({
             projectId: ID,
             assets: ASSETS,
             chainId: CHAIN_ID,
-            archive: ARCHIVE
+            archive: ARCHIVE,
+            path: PATH
         })
 
         while (infinite || count === 0) {
