@@ -97,7 +97,11 @@ class Holders {
             }
 
             // uncomment to print out round data
-            // this.printout(`${this.projectId}_Round_${i + 1}_${to}_${(new Date()).valueOf()}`, JSON.stringify(this.WALLETS))
+            this.printout(`${this.projectId}_Round_${i + 1}_${to}_${(new Date()).valueOf()}`, JSON.stringify(this.WALLETS))
+
+            // uncomment to allow for automatic update the archive and startblock
+            this.updateArchiveAndStartBlock(this.path, this.WALLETS, to)
+
 
             await delay(this.DELAY)
         }
@@ -105,8 +109,7 @@ class Holders {
         // uncomment to print out archive data
         // this.printout(`${this.projectId}_Final_${(new Date()).valueOf()}`, JSON.stringify(this.WALLETS))
 
-        // uncomment to allow for automatically update the achieve and startblock
-        updateArchiveAndStartBlock(this.path, content, currentBlock)
+
     }
 
     async parseTransactionsErc721(fromBlock, toBlock) {
@@ -196,35 +199,32 @@ class Holders {
         return (this.BURNT_ADDRESSES.map(item => item.toLowerCase()).indexOf(address.toLowerCase()) === -1)
     }
 
-    // printout(filename, content) {
-    //     fs.writeFile(`${process.cwd()}/${filename}.txt`, content, { flag: 'w+' }, err => {
-    //         if (err) {
-    //             this.logger.error(`${err.message}`)
-    //             return
-    //         }
-    //         //file written successfully
-    //     })
-
-
-    // }
-
-    //Update constants.json file
-    updateArchiveAndStartBlock(path, content, currentBlock) {
-        const constants = JSON.parse(fs.readFileSync(path + "constants.json", "utf-8"))
-
-        const edittedJSON = { ...constants, ARCHIVE: { ...constants.ARCHIVE, ...content }, ASSETS: [{ ...constants.ASSETS[0], startBlock: currentBlock }] }
-
-        fs.writeFile(path + "output.json", JSON.stringify(edittedJSON, null, 4), { flag: 'w+' }, err => {
+    printout(filename, content) {
+        fs.writeFile(`${process.cwd()}/${filename}.txt`, content, { flag: 'w+' }, err => {
             if (err) {
-                console.log(err)
+                this.logger.error(`${err.message}`)
                 return
             }
+            //file written successfully
         })
 
 
     }
 
+    //Update constants.json file
+    async updateArchiveAndStartBlock(path, content, currentBlock) {
+        const constants = await JSON.parse(fs.readFileSync(path + "constants.json", "utf-8"))
 
+        const edittedJSON = { ...constants, ARCHIVE: { ...constants.ARCHIVE, ...content }, ASSETS: [{ ...constants.ASSETS[0], startBlock: currentBlock }] }
+
+        fs.writeFile(path + "constants.json", JSON.stringify(edittedJSON, null, 4), { flag: 'w+' }, err => {
+            if (err) {
+                console.log(err)
+                return
+            }
+        })
+        console.log(`constants.json successfully updated to block${currentBlock}`)
+    }
 }
 
 module.exports = {
