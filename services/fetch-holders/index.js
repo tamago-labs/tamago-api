@@ -99,10 +99,10 @@ async function run({
                 }
             );
 
-            logger.debug("End of execution loop - waiting polling delay")
+            logger.debug("End of execution loop ", (new Date()).toLocaleTimeString())
 
             count += 1;
-          
+
             if (infinite !== true && count > 0) {
                 logger.debug("Exiting...")
                 break
@@ -121,7 +121,8 @@ async function Poll(callback) {
     try {
 
         const args = process.argv.slice(2);
-        console.log("args==> ", args)
+        console.log("args--> ", args)
+        console.log("Start of process", (new Date()).toLocaleTimeString())
         if (!args[0]) {
             throw new Error("Please provide your project key, ex. 'yarn run fetch-holders 1-tamago-original'")
         }
