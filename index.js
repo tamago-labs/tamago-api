@@ -49,6 +49,25 @@ const projectTable = new aws.dynamodb.Table(
     }
 )
 
+const orderTable = new aws.dynamodb.Table(
+    "orderTable",
+    {
+        attributes: [
+            {
+                name: "network",
+                type: "S"
+            },
+            {
+                name: "orderId",
+                type: "N"
+            }
+        ],
+        hashKey: "network",
+        rangeKey: "orderId",
+        billingMode: "PAY_PER_REQUEST"
+    }
+)
+
 const angpowApi = new awsx.apigateway.API("angpow-api", {
     routes: [
         {
@@ -114,7 +133,7 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
 
                 if (event && event.pathParameters) {
 
-                    const client = new aws.sdk.DynamoDB.DocumentClient()
+                    // const client = new aws.sdk.DynamoDB.DocumentClient()
                     const base64String = event.pathParameters.proxy
 
                     const buff = Buffer.from(base64String, "base64");
@@ -201,6 +220,11 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
             path: "/events/proof/{proxy+}",
             eventHandler: async (event) => await generateProof(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
         },
+        // {
+        //     method: "GET",
+        //     path: "/orders",
+        //     eventHandler: async (event) => await getOrders(event, orderTable.name.get())
+        // },
     ]
 })
 
