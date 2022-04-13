@@ -1,0 +1,35 @@
+{
+    "PATH": "./projects/7-lucky-red-envelope-on-polygon/",
+    "ID": 7,
+    "NAME": "Lucky Red Envelope on Polygon",
+    "CHAIN_ID": 137,
+    "ASSETS": [
+        {
+            "address": "0x74ff3978db218e621bcde8114b544bb605adfa08",
+            "is1155": true,
+            "useArchive": true,
+            "startBlock": 23750573
+        }
+    ],
+    "TOTAL_ITEMS": 3,
+    "IMAGE_URL": "https://lh3.googleusercontent.com/xA_iN57897FxI1sMVLwNCESGisF-iwZhM85pSAray595byydjo7hHsvOIfmQuRBISMz77fbeT7-Zxriw1AMZJnpIW_ODDufJ0lAhicc=s130",
+    "DESCRIPTION": "The first value-backed NFT collection that was invented by Tamago Finance team, each represents specific amount of US currency from $1, $10, $100 and can be redeemed via app-v2.tamago.finance",
+    "ARCHIVE": {
+        "0x9C01E0B8227eb869B479c12665b40Cc864C787a8": {
+            "1": 1,
+            "2": 2,
+            "3": 9
+        },
+        "0x971F6680a20671458d456656081ea8e32102a64e": {
+            "1": -1,
+            "2": -2,
+            "3": -10
+        },
+        "0x0000000000000000000000000000000000000000": {
+            "3": 1
+        },
+        "0x991fc6a41338Fd278AfC25C602c87de8305D3d7a": {
+            "3": 0
+        }
+    }
+}

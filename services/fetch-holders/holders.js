@@ -12,7 +12,7 @@ class Holders {
         1: 5000
     }
 
-    BURNT_ADDRESSES = ["0x000000000000000000000000000000000000dEaD" , "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000001"]
+    BURNT_ADDRESSES = ["0x000000000000000000000000000000000000dEaD", "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000001"]
 
     WALLETS = {}
 
@@ -37,7 +37,8 @@ class Holders {
         projectId,
         assets,
         chainId,
-        archive
+        archive,
+        path
     }) {
 
         this.logger = logger
@@ -49,7 +50,7 @@ class Holders {
         this.projectId = projectId
         this.assets = assets
         this.chainId = chainId
-
+        this.path = path
         this.DELAY = queryDelay
         this.INTERVALS = queryInterval
 
@@ -96,13 +97,19 @@ class Holders {
             }
 
             // uncomment to print out round data
-            // this.printout(`${this.projectId}_Round_${i+1}_${to}_${(new Date()).valueOf()}`, JSON.stringify(this.WALLETS))
+            // this.printout(`${this.projectId}_Round_${i + 1}_${to}_${(new Date()).valueOf()}`, JSON.stringify(this.WALLETS))
+
+            // uncomment to allow for automatic update the archive and startblock
+            this.updateArchiveAndStartBlock(this.path, this.WALLETS, to)
+
 
             await delay(this.DELAY)
         }
 
         // uncomment to print out archive data
         // this.printout(`${this.projectId}_Final_${(new Date()).valueOf()}`, JSON.stringify(this.WALLETS))
+
+
     }
 
     async parseTransactionsErc721(fromBlock, toBlock) {
@@ -200,8 +207,24 @@ class Holders {
             }
             //file written successfully
         })
+
+
     }
 
+    //Update constants.json file
+    async updateArchiveAndStartBlock(path, content, currentBlock) {
+        const constants = await JSON.parse(fs.readFileSync(path + "constants.json", "utf-8"))
+
+        const edittedJSON = { ...constants, ARCHIVE: { ...constants.ARCHIVE, ...content }, ASSETS: [{ ...constants.ASSETS[0], startBlock: currentBlock }] }
+
+        fs.writeFile(path + "constants.json", JSON.stringify(edittedJSON, null, 4), { flag: 'w+' }, err => {
+            if (err) {
+                console.log(err)
+                return
+            }
+        })
+        console.log(`constants.json successfully updated to block ${currentBlock}`)
+    }
 }
 
 module.exports = {
