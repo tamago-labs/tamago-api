@@ -61,10 +61,10 @@ const getProvider = (chainId = 137) => {
 
     switch (chainId) {
         case 137:
-            rpcUrl = process.env.POLYGON_RPC_SERVER || ""
+            rpcUrl = process.env.POLYGON_RPC_SERVER || "https://polygon-mainnet.g.alchemy.com/v2/jucVpnvhzklnSjwTPXs5sTdz3IkIELwx"
             break;
         case 1:
-            rpcUrl = process.env.MAINNET_RPC_SERVER || ""
+            rpcUrl = process.env.MAINNET_RPC_SERVER || "https://nd-454-395-901.p2pify.com/aa03c13657e5ccc30a12bba624297b80"
         default:
             break;
     }
