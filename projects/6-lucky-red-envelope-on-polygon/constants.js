@@ -1,4 +1,4 @@
-const ID = 7;
+const ID = 6;
 const NAME = "Lucky Red Envelope on Polygon";
 const CHAIN_ID = 137;
 const ASSETS = [
