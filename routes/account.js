@@ -1,6 +1,8 @@
 const pulumi = require("@pulumi/pulumi");
 const aws = require("@pulumi/aws");
 const awsx = require("@pulumi/awsx");
+const check = require('check-types');
+const Account = require("../types/account")
 
 const { headers } = require("./")
 
@@ -27,6 +29,7 @@ const getAccount = async (event, tableName) => {
                 body: JSON.stringify({
                     status: "ok",
                     account: accountId,
+                    email: Item.email,
                     disabled: Item.disabled
                 }),
             }
@@ -47,63 +50,72 @@ const getAccount = async (event, tableName) => {
 
 const createAccount = async (event, tableName) => {
 
-    if (event && event.pathParameters) {
+    try {
 
-        // const client = new aws.sdk.DynamoDB.DocumentClient()
-        const base64String = event.pathParameters.proxy
+        if (event && event.pathParameters) {
 
-        const buff = Buffer.from(base64String, "base64");
-        const eventBodyStr = buff.toString('UTF-8');
-        const eventBody = JSON.parse(eventBodyStr);
+            // const client = new aws.sdk.DynamoDB.DocumentClient()
+            const base64String = event.pathParameters.proxy
 
-        console.log("Receiving payload : ", eventBody)
+            const buff = Buffer.from(base64String, "base64");
+            const eventBodyStr = buff.toString('UTF-8');
+            const eventBody = JSON.parse(eventBodyStr);
 
-        // example payload
-        // {
-        //     username : pisuthd.nft,
-        //     address : xxxx,
-        //     disabled : false,
-        //     email : pisuth@tamago.finance
-        // }
+            console.log("Receiving payload : ", eventBody)
 
-        if (eventBody && eventBody.username) {
+            // example payload
+            // {
+            //     username : pisuthd.nft,
+            //     address : xxxx,
+            //     disabled : false,
+            //     email : pisuth@tamago.finance
+            // }
 
-            const params = {
-                TableName: tableName,
-                Item: {
-                    ...eventBody,
-                    "key": "account",
-                    "value": eventBody.username
+            if (eventBody && check.like(eventBody, Account)) {
+
+                const params = {
+                    TableName: tableName,
+                    Item: {
+                        ...eventBody,
+                        "key": "account",
+                        "value": eventBody.username
+                    }
                 }
+
+                console.log("saving : ", params)
+
+                const client = new aws.sdk.DynamoDB.DocumentClient()
+
+                await client.put(params).promise()
+
+                return {
+                    statusCode: 200,
+                    headers,
+                    body: JSON.stringify({
+                        "status": "ok",
+                        "username": eventBody.username
+                    }),
+                }
+
+            } else {
+                throw new Error("Invalid JSON structure")
             }
 
-            console.log("saving : ", params)
-
-            const client = new aws.sdk.DynamoDB.DocumentClient()
-
-            await client.put(params).promise()
-
-            return {
-                statusCode: 200,
-                headers,
-                body: JSON.stringify({
-                    "status": "ok",
-                    "username": eventBody.username
-                }),
-            }
-
+        } else {
+            throw new Error("Invalid input")
         }
 
+    } catch (error) {
+        return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({
+                status: "error",
+                message: `${error.message || "Unknown error."}`
+            }),
+        };
     }
 
-    return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-            status: "error",
-            message: "Invalid Input"
-        }),
-    }
 }
 
 
