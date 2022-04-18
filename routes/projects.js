@@ -64,7 +64,7 @@ const getProject = async (event, tableName) => {
                 attachedList = event.queryStringParameters.holderlist === "yes" ? true : false
             }
 
-            const lastWeekTimestamp = currentTimestamp - (86400 * 7)
+            const last3DayTimestamp = currentTimestamp - (86400 * 3)
 
             const params = {
                 TableName: tableName,
@@ -75,7 +75,7 @@ const getProject = async (event, tableName) => {
                 },
                 ExpressionAttributeValues: {
                     ":projectId": Number(projectId),
-                    ":from": lastWeekTimestamp,
+                    ":from": last3DayTimestamp,
                     ":to": currentTimestamp
                 }
             };
@@ -103,6 +103,7 @@ const getProject = async (event, tableName) => {
                         chainId: extend.chainId,
                         imageUrl: extend.imageUrl,
                         total: extend.total || 0,
+                        contractAddress : extend.assets && extend.assets[0] && extend.assets[0].address || null,
                         ...lastItem
                     }),
                 }

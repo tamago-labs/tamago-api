@@ -110,6 +110,7 @@ const getEvent = async (event, { dataTable, projectTable }) => {
 
                 // generate the winner list
                 let onchainData
+                let totalWinners = 0
 
                 if (Item.rewardContract && Item.chainId) {
                     const provider = getProvider(Number(Item.chainId))
@@ -132,7 +133,7 @@ const getEvent = async (event, { dataTable, projectTable }) => {
                     }
 
                     onchainData.winners = await finalizeWinners(luckboxContract, onchainData)
-
+                    totalWinners = onchainData.winners.length
                 }
 
                 return {
@@ -147,6 +148,7 @@ const getEvent = async (event, { dataTable, projectTable }) => {
                         ...Item,
                         participants: participants.length,
                         ...onchainData,
+                        totalWinners,
                         timestamp: {
                             requiredTimestamp,
                             latestSnapshot: snapshotTimestamp
@@ -230,6 +232,8 @@ const generateProof = async (event, { dataTable, projectTable }) => {
 
                 participants.sort()
 
+                let totalWinners = 0
+
                 // generate winner list
                 const provider = getProvider(Number(Item.chainId))
                 const luckboxContract = new ethers.Contract(Item.rewardContract, LUCKBOX_ABI, provider)
@@ -249,6 +253,7 @@ const generateProof = async (event, { dataTable, projectTable }) => {
                 }
 
                 const winners = await finalizeWinners(luckboxContract, data)
+                totalWinners = winners.length
 
                 // generate Merkle tree 
                 const leaves = winners.map(item => ethers.utils.keccak256(ethers.utils.solidityPack(["address", "uint256"], [item.winnerAddress, Number(item.rewardId)])))
@@ -263,6 +268,7 @@ const generateProof = async (event, { dataTable, projectTable }) => {
                         status: "ok",
                         eventId,
                         rewardContract: Item.rewardContract,
+                        totalWinners,
                         root,
                         winners: winners.map((item => {
                             const proof = tree.getHexProof(ethers.utils.keccak256(ethers.utils.solidityPack(["address", "uint256"], [item.winnerAddress, Number(item.rewardId)])))
