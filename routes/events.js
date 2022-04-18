@@ -21,7 +21,8 @@ const getAllEvents = async (event, tableName) => {
             },
             ExpressionAttributeValues: {
                 ":key": "event"
-            }
+            },
+            ProjectionExpression: "visible, community, eventId, participants, wallets, slug, spots, ended,imageUrl, claimStart, claimEnd, title"
         };
 
         const client = new aws.sdk.DynamoDB.DocumentClient()
