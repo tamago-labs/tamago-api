@@ -1,0 +1,18 @@
+{
+    "PATH": "./projects/7-lasercat-nft/",
+    "ID": 7,
+    "NAME": "LaserCat NFT",
+    "CHAIN_ID": 1,
+    "ASSETS": [
+        {
+            "address": "0x08BA8CBbefa64Aaf9DF25e57fE3f15eCC277Af74",
+            "is1155": false,
+            "useArchive": true,
+            "startBlock": 14100214
+        }
+    ],
+    "TOTAL_ITEMS": 520,
+    "IMAGE_URL": "https://lh3.googleusercontent.com/CoquxgvVeYhbP7F5PQm0PUuQxrLS-GIccPQXjUhKgPO2WBLW5wdzKDyE9kkr1pHsRF8washlF55pOzJQ7JQXGFyTqtuMwwBWHuJs=s130",
+    "DESCRIPTION": "LaserCat NFT, a pass for private channels on Discord, not only PFP + Alpha, but also an access to our exclusive NFT tools. The NFTs can be staked on our official website ( https://lasercat.co/ ) to gain FISH credits, which are used for buying in-real-life items and entering VIP member Whitelist spots raffle. Many more future utilities would be revealed soon, stay tuned.",
+    "ARCHIVE": {}
+}
