@@ -1,0 +1,18 @@
+{
+    "PATH": "./projects/xxx/",
+    "ID": 0,
+    "NAME": "QWERTY",
+    "CHAIN_ID": 0,
+    "ASSETS": [
+        {
+            "address": "0x0000",
+            "is1155": false,
+            "useArchive": true,
+            "startBlock": 0
+        }
+    ],
+    "TOTAL_ITEMS": 0,
+    "IMAGE_URL": "image url",
+    "DESCRIPTION": "",
+    "ARCHIVE": {}
+}
