@@ -100,8 +100,8 @@ const createEvent = async (event , { dataTable, projectTable }) => {
                 const { Items } = await client.query(params).promise()
 
                 const eventId = Items.reduce((result, item) => {
-                    if (Number(item) > result) {
-                        result = item
+                    if (Number(item.eventId) > result) {
+                        result = Number(item.eventId)
                     }
                     return result
                 }, 0) + 1
@@ -120,8 +120,8 @@ const createEvent = async (event , { dataTable, projectTable }) => {
                     Item: {
                         ...eventBody,
                         "key": "event",
-                        "value": eventId,
-                        "eventId": eventId,
+                        "value": `${eventId}`,
+                        "eventId": `${eventId}`,
                         spots,
                         wallets
                     }
