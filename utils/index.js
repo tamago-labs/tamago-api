@@ -16,7 +16,7 @@ const generateWinners = ({
 
         const index = (ethers.BigNumber.from(`${seedNumber}`).mod(ethers.BigNumber.from(participants.length)))
 
-        if (output.indexOf(output[Number(index)]) === -1) {
+        if (output.indexOf(participants[Number(index)]) === -1) {
             output.push(participants[Number(index)])
         }
 
