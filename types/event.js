@@ -1,5 +1,6 @@
 
 const Event = {
+    slug : "naga-nft-mar-2022",
     title: "Naga DAO NFT",
     description: "3x Naga DAO NFT rewards for 3 lucky owners who held Naga DAO NFT at the time of snapshot(Saturday, 26 March 2022, 00:00:00 UTC).",
     imageUrl: "https://img.tamago.finance/luckbox/event/event-2.png",
@@ -19,5 +20,6 @@ const Event = {
         }
     ]
 }
+
 
 module.exports = Event
