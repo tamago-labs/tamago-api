@@ -9,6 +9,7 @@ const keccak256 = require("keccak256")
 const { headers } = require("./")
 const { LUCKBOX_ABI } = require("../abi")
 const Event = require("../types/event")
+const Registration = require("../types/registration")
 const { generateWinners, finalizeWinners, getProvider } = require("../utils")
 
 const getParticipants = async (currentTimestamp, projectTable, projectIds) => {
@@ -47,12 +48,12 @@ const getParticipants = async (currentTimestamp, projectTable, projectIds) => {
     }
 
     return {
-        participants : participants.sort(),
+        participants: participants.sort(),
         snapshotTimestamp
     }
 }
 
-const createEvent = async (event , { dataTable, projectTable }) => {
+const createEvent = async (event, { dataTable, projectTable }) => {
 
     try {
         if (event && event.pathParameters) {
@@ -160,10 +161,90 @@ const createEvent = async (event , { dataTable, projectTable }) => {
 
 }
 
+const register = async (event, { dataTable }) => {
+
+    try {
+
+        const base64String = event.pathParameters.proxy
+
+        const buff = Buffer.from(base64String, "base64");
+        const eventBodyStr = buff.toString('UTF-8');
+        const eventBody = JSON.parse(eventBodyStr);
+
+        console.log("Receiving payload : ", eventBody)
+
+        if (eventBody && check.like(eventBody, Registration)) {
+
+            const eventId = eventBody.eventId
+            const client = new aws.sdk.DynamoDB.DocumentClient()
+
+            let params = {
+                TableName: dataTable,
+                Key: {
+                    "key": "event",
+                    "value": eventId
+                }
+            };
+
+            let { Item } = await client.get(params).promise()
+
+            if (Item) {
+
+                if (!Item["registered"]) {
+                    Item["registered"] = []
+                }
+
+                if (Item["registered"].indexOf(eventBody.walletAddress) === -1) {
+                    Item["registered"].push(eventBody.walletAddress)
+                }
+
+                params = {
+                    TableName: dataTable,
+                    Item
+                }
+
+                await client.put(params).promise()
+
+                return {
+                    statusCode: 200,
+                    headers,
+                    body: JSON.stringify({
+                        "status": "ok",
+                        "eventId": eventId
+                    }),
+                }
+
+            } else {
+                throw new Error("Invalid event ID")
+            }
+
+        } else {
+            throw new Error("Invalid incoming data struture")
+        }
+
+    } catch (error) {
+        console.log(error)
+        return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({
+                status: "error",
+                message: `${error.message || "Unknown error."}`
+            }),
+        };
+    }
+
+}
 
 const getAllEvents = async (event, tableName) => {
 
     try {
+
+        let showAll = false
+
+        if (event.queryStringParameters && event.queryStringParameters.all && event.queryStringParameters.all === "yes") {
+            showAll = true
+        }
 
         const params = {
             TableName: tableName,
@@ -185,7 +266,7 @@ const getAllEvents = async (event, tableName) => {
             headers,
             body: JSON.stringify({
                 status: "ok",
-                events: Items.filter(item => item.visible)
+                events: showAll ? Items : Items.filter(item => item.visible)
             }),
         }
 
@@ -227,7 +308,7 @@ const getEvent = async (event, { dataTable, projectTable }) => {
 
                 // get the holder list
                 const projectIds = Item.participants
-                const { participants , snapshotTimestamp } = await getParticipants(requiredTimestamp, projectTable, projectIds)
+                const { participants, snapshotTimestamp } = await getParticipants(requiredTimestamp, projectTable, projectIds)
 
                 // generate the winner list
                 let onchainData
@@ -294,6 +375,59 @@ const getEvent = async (event, { dataTable, projectTable }) => {
     }
 }
 
+
+const getRegistered = async (event, { dataTable, projectTable }) => {
+
+    try {
+
+        if (event && event.pathParameters) {
+
+            const eventId = event.pathParameters.proxy
+            const client = new aws.sdk.DynamoDB.DocumentClient()
+
+            const params = {
+                TableName: dataTable,
+                Key: {
+                    "key": "event",
+                    "value": eventId
+                }
+            };
+
+            const { Item } = await client.get(params).promise()
+
+            if (Item) {
+                let registered = []
+
+                if (Item.registered) {
+                    registered = Item.registered
+                }
+
+                return {
+                    statusCode: 200,
+                    headers,
+                    body: JSON.stringify({
+                        status: "ok",
+                        registered
+                    }),
+                }
+            }
+        }
+
+        throw new Error("Invalid event ID")
+
+    } catch (error) {
+        return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({
+                status: "error",
+                message: `${error.message || "Unknown error."}`
+            }),
+        };
+    }
+
+}
+
 const generateProof = async (event, { dataTable, projectTable }) => {
 
     try {
@@ -319,8 +453,8 @@ const generateProof = async (event, { dataTable, projectTable }) => {
 
                 // get the holder list
                 const projectIds = Item.participants
-                const { participants  } = await getParticipants(requiredTimestamp, projectTable, projectIds)
-                
+                const { participants } = await getParticipants(requiredTimestamp, projectTable, projectIds)
+
                 let totalWinners = 0
 
                 // generate winner list
@@ -390,5 +524,7 @@ module.exports = {
     getAllEvents,
     getEvent,
     generateProof,
-    createEvent
+    createEvent,
+    register,
+    getRegistered
 }
