@@ -3,7 +3,22 @@ const pulumi = require("@pulumi/pulumi");
 const aws = require("@pulumi/aws");
 const awsx = require("@pulumi/awsx");
 
-const { mainnet, polygon, bsc, getAllProjects, getProject, getAllEvents, getEvent, generateProof, getAccount, createAccount, createEvent } = require("./routes")
+const {
+    mainnet,
+    polygon,
+    bsc,
+    getAllProjects,
+    getProject,
+    getAllEvents,
+    getEvent,
+    generateProof,
+    getAccount,
+    createAccount,
+    createEvent,
+    getAllRewards,
+    register,
+    getRegistered
+} = require("./routes")
 
 const Headers = {
     "Access-Control-Allow-Headers": "Content-Type",
@@ -126,8 +141,18 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
         },
         {
             method: "GET",
+            path: "/events/registered/{proxy+}",
+            eventHandler: async (event) => await getRegistered(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
+        },
+        {
+            method: "GET",
             path: "/createEvent/{proxy+}",
             eventHandler: async (event) => await createEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
+        },
+        {
+            method: "GET",
+            path: "/register/{proxy+}",
+            eventHandler: async (event) => await register(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
         },
         {
             method: "GET",
@@ -136,6 +161,11 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
         },
         {
             method: "GET", path: "/createAccount/{proxy+}", eventHandler: async (event) => await createAccount(event, dataTable.name.get()),
+        },
+        {
+            method: "GET",
+            path: "/rewards",
+            eventHandler: async (event) => await getAllRewards(event, dataTable.name.get())
         }
         // {
         //     method: "GET",

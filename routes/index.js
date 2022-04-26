@@ -1,7 +1,8 @@
 const { mainnet , polygon, bsc } = require("./angpow")
 const { getAllProjects, getProject } = require("./projects")
-const { getAllEvents, getEvent, generateProof, createEvent } = require("./events")
+const { getAllEvents, getEvent, generateProof, createEvent, register , getRegistered } = require("./events")
 const { getAccount, createAccount } = require("./account")
+const { getAllRewards } = require("./rewards")
 
 const headers = {
     "Access-Control-Allow-Headers": "Content-Type",
@@ -21,5 +22,8 @@ module.exports = {
     generateProof,
     getAccount,
     createAccount,
-    createEvent
+    createEvent,
+    getAllRewards,
+    register,
+    getRegistered
 }
