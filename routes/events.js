@@ -203,6 +203,8 @@ const register = async (event, { dataTable }) => {
                     Item
                 }
 
+                console.log("saving: \n", Item)
+
                 await client.put(params).promise()
 
                 return {

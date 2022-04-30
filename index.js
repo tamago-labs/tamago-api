@@ -17,7 +17,12 @@ const {
     createEvent,
     getAllRewards,
     register,
-    getRegistered
+    getRegistered,
+    getAllOrders,
+    createOrder,
+    getOrder,
+    confirmOrder,
+    cancelOrder
 } = require("./routes")
 
 const Headers = {
@@ -60,25 +65,6 @@ const projectTable = new aws.dynamodb.Table(
         ],
         hashKey: "projectId",
         rangeKey: "timestamp",
-        billingMode: "PAY_PER_REQUEST"
-    }
-)
-
-const orderTable = new aws.dynamodb.Table(
-    "orderTable",
-    {
-        attributes: [
-            {
-                name: "network",
-                type: "S"
-            },
-            {
-                name: "orderId",
-                type: "N"
-            }
-        ],
-        hashKey: "network",
-        rangeKey: "orderId",
         billingMode: "PAY_PER_REQUEST"
     }
 )
@@ -166,12 +152,32 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
             method: "GET",
             path: "/rewards",
             eventHandler: async (event) => await getAllRewards(event, dataTable.name.get())
+        },
+        {
+            method: "GET",
+            path: "/orders",
+            eventHandler: async (event) => await getAllOrders(event, dataTable.name.get())
+        },
+        {
+            method: "POST",
+            path: "/orders",
+            eventHandler: async (event) => await createOrder(event, dataTable.name.get())
+        },
+        {
+            method: "POST",
+            path: "/orders/confirm",
+            eventHandler: async (event) => await confirmOrder(event, dataTable.name.get())
+        },
+        {
+            method: "POST",
+            path: "/orders/cancel",
+            eventHandler: async (event) => await cancelOrder(event, dataTable.name.get())
+        },
+        {
+            method: "GET",
+            path: "/orders/{proxy+}",
+            eventHandler: async (event) => await getOrder(event, dataTable.name.get())
         }
-        // {
-        //     method: "GET",
-        //     path: "/orders",
-        //     eventHandler: async (event) => await getOrders(event, orderTable.name.get())
-        // },
     ]
 })
 
