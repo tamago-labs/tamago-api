@@ -76,8 +76,23 @@ const getProvider = (chainId = 137) => {
     return new ethers.providers.JsonRpcProvider(rpcUrl)
 }
 
+const parseBody = (event) => {
+    let { body, isBase64Encoded } = event
+
+    if (isBase64Encoded === true) {
+        const base64String = body
+        const buff = Buffer.from(base64String, "base64");
+        const eventBodyStr = buff.toString('UTF-8');
+        body = JSON.parse(eventBodyStr);
+    } else {
+        body = JSON.parse(body);
+    }
+    return body
+}
+
 module.exports = {
     generateWinners,
     finalizeWinners,
-    getProvider
+    getProvider,
+    parseBody
 }
