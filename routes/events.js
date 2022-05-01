@@ -312,6 +312,14 @@ const getEvent = async (event, { dataTable, projectTable }) => {
                 const projectIds = Item.participants
                 const { participants, snapshotTimestamp } = await getParticipants(requiredTimestamp, projectTable, projectIds)
 
+                // check who registered to the event
+                const registered = Item.registered ? (Item.registered).map(item => item.toLowerCase()) : []
+
+                console.log("all registered wallets :\n", registered)
+                const eligibleParticipants =  participants.filter( item => registered.indexOf( item.toLowerCase()) !== -1  )
+
+                console.log("all eligible participants :\n", eligibleParticipants)
+
                 // generate the winner list
                 let onchainData
                 let totalWinners = 0
@@ -331,7 +339,7 @@ const getEvent = async (event, { dataTable, projectTable }) => {
                         seedNumber: eventInfo['seed'].toString(),
                         winners: generateWinners({
                             rewards: Item.rewards,
-                            participants,
+                            participants : eligibleParticipants.length === 0 ? participants : eligibleParticipants,
                             seedNumber: eventInfo['seed'].toString()
                         })
                     }
@@ -457,6 +465,14 @@ const generateProof = async (event, { dataTable, projectTable }) => {
                 const projectIds = Item.participants
                 const { participants } = await getParticipants(requiredTimestamp, projectTable, projectIds)
 
+                // check who registered to the event
+                const registered = Item.registered ? (Item.registered).map(item => item.toLowerCase()) : []
+
+                console.log("all registered wallets :\n", registered)
+                const eligibleParticipants =  participants.filter( item => registered.indexOf( item.toLowerCase()) !== -1  )
+
+                console.log("all eligible participants :\n", eligibleParticipants)
+
                 let totalWinners = 0
 
                 // generate winner list
@@ -472,7 +488,7 @@ const generateProof = async (event, { dataTable, projectTable }) => {
                     seedNumber: eventInfo['seed'].toString(),
                     winners: generateWinners({
                         rewards: Item.rewards,
-                        participants,
+                        participants : eligibleParticipants.length === 0 ? participants : eligibleParticipants,
                         seedNumber: eventInfo['seed'].toString()
                     })
                 }
