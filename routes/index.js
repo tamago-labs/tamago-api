@@ -4,6 +4,7 @@ const { getAllEvents, getEvent, generateProof, createEvent, register , getRegist
 const { getAccount, createAccount } = require("./account")
 const { getAllRewards } = require("./rewards")
 const { getAllOrders, createOrder, getOrder, confirmOrder, cancelOrder  } = require("./orders")
+const { getCollections } = require("./collections")
 
 const headers = {
     "Access-Control-Allow-Headers": "Content-Type",
@@ -31,5 +32,6 @@ module.exports = {
     createOrder,
     getOrder,
     confirmOrder,
-    cancelOrder
+    cancelOrder,
+    getCollections
 }

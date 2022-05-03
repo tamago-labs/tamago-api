@@ -13,26 +13,20 @@ const { parseBody } = require("../utils")
 
 const getAllOrders = async (event, tableName) => {
 
-    console.log("get all orders")
+    console.log("get all orders...")
 
     try {
 
-        let showAll = false
-
-        if (event.queryStringParameters && event.queryStringParameters.all && event.queryStringParameters.all === "yes") {
-            showAll = true
-        }
-
         const params = {
             TableName: tableName,
-            KeyConditionExpression: "#key = :key",
+            KeyConditionExpression: "#version = :version",
             ExpressionAttributeNames: {
-                "#key": "key"
+                "#version": "version"
             },
             ExpressionAttributeValues: {
-                ":key": "order"
+                ":version": 1
             },
-            ProjectionExpression: "chainId, confirmed, visible, canceled, fulfilled, ownerAddress, baseAssetAddress, baseAssetTokenId, baseAssetIs1155, barterList, timestamp"
+            // ProjectionExpression: "orderId"
         };
 
         const client = new aws.sdk.DynamoDB.DocumentClient()
@@ -43,7 +37,7 @@ const getAllOrders = async (event, tableName) => {
             headers,
             body: JSON.stringify({
                 status: "ok",
-                orders: Items.filter(item => item.visible)
+                orders: Items
             }),
         }
 
@@ -127,15 +121,15 @@ const createOrder = async (event, tableName) => {
 
         if (body && check.like(body, Order)) {
 
-            // looks for Event ID
+            // looks for Order ID
             let params = {
                 TableName: tableName,
-                KeyConditionExpression: "#key = :key",
+                KeyConditionExpression: "#version = :version",
                 ExpressionAttributeNames: {
-                    "#key": "key"
+                    "#version": "version"
                 },
                 ExpressionAttributeValues: {
-                    ":key": "order"
+                    ":version": 1
                 },
                 ProjectionExpression: "orderId"
             };
@@ -152,18 +146,24 @@ const createOrder = async (event, tableName) => {
 
             console.log("Adding new order with ID : ", orderId)
 
+            const orderItem = {
+                ...body,
+                "version": 1,
+                "orderId": orderId,
+                "confirmed": false,
+                "visible": false,
+                "canceled": false,
+                "locked" : false,
+                "timestamp": Math.floor(new Date().valueOf() / 1000)
+            }
+
             params = {
                 TableName: tableName,
-                Item: {
-                    ...body,
-                    "key": "order",
-                    "value": `${orderId}`,
-                    "orderId": `${orderId}`,
-                    "confirmed": false,
-                    "visible": false,
-                    "canceled": false,
-                    "timestamp": Math.floor(new Date().valueOf() / 1000)
-                }
+                Item: orderItem
+            }
+
+            if (!check.like(orderItem, Order)) {
+                throw new Error("Invalid JSON structure")
             }
 
             console.log("saving : ", params)
@@ -216,8 +216,8 @@ const confirmOrder = async (event, tableName) => {
         let params = {
             TableName: tableName,
             Key: {
-                "key": "order",
-                "value": orderId
+                "version": 1,
+                "orderId": orderId
             }
         };
 
@@ -296,8 +296,8 @@ const cancelOrder = async (event, tableName) => {
         let params = {
             TableName: tableName,
             Key: {
-                "key": "order",
-                "value": orderId
+                "version": 1,
+                "orderId": orderId
             }
         };
 
