@@ -4,7 +4,7 @@ const awsx = require("@pulumi/awsx");
 
 const config = new pulumi.Config();
 
-const { headers } = require("./")
+const { headers } = require("./headers")
 
 let projects = config.getObject("projects") || []
 
@@ -103,7 +103,7 @@ const getProject = async (event, tableName) => {
                         chainId: extend.chainId,
                         imageUrl: extend.imageUrl,
                         total: extend.total || 0,
-                        contractAddress : extend.assets && extend.assets[0] && extend.assets[0].address || null,
+                        contractAddress: extend.assets && extend.assets[0] && extend.assets[0].address || null,
                         ...lastItem
                     }),
                 }

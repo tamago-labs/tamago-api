@@ -4,7 +4,7 @@ const awsx = require("@pulumi/awsx");
 const { ethers } = require("ethers");
 const check = require('check-types');
 
-const { headers } = require("./")
+const { headers } = require("./headers")
 const Reward = require("../types/event")
 
 const getAllRewards = async (event, tableName) => {

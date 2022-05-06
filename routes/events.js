@@ -6,7 +6,7 @@ const check = require('check-types');
 const { MerkleTree } = require('merkletreejs')
 const keccak256 = require("keccak256")
 
-const { headers } = require("./")
+const { headers } = require("./headers")
 const { LUCKBOX_ABI } = require("../abi")
 const Event = require("../types/event")
 const Registration = require("../types/registration")
@@ -316,7 +316,7 @@ const getEvent = async (event, { dataTable, projectTable }) => {
                 const registered = Item.registered ? (Item.registered).map(item => item.toLowerCase()) : []
 
                 console.log("all registered wallets :\n", registered)
-                const eligibleParticipants =  participants.filter( item => registered.indexOf( item.toLowerCase()) !== -1  )
+                const eligibleParticipants = participants.filter(item => registered.indexOf(item.toLowerCase()) !== -1)
 
                 console.log("all eligible participants :\n", eligibleParticipants)
 
@@ -339,7 +339,7 @@ const getEvent = async (event, { dataTable, projectTable }) => {
                         seedNumber: eventInfo['seed'].toString(),
                         winners: generateWinners({
                             rewards: Item.rewards,
-                            participants : eligibleParticipants.length === 0 ? participants : eligibleParticipants,
+                            participants: eligibleParticipants.length === 0 ? participants : eligibleParticipants,
                             seedNumber: eventInfo['seed'].toString()
                         })
                     }
@@ -469,7 +469,7 @@ const generateProof = async (event, { dataTable, projectTable }) => {
                 const registered = Item.registered ? (Item.registered).map(item => item.toLowerCase()) : []
 
                 console.log("all registered wallets :\n", registered)
-                const eligibleParticipants =  participants.filter( item => registered.indexOf( item.toLowerCase()) !== -1  )
+                const eligibleParticipants = participants.filter(item => registered.indexOf(item.toLowerCase()) !== -1)
 
                 console.log("all eligible participants :\n", eligibleParticipants)
 
@@ -488,7 +488,7 @@ const generateProof = async (event, { dataTable, projectTable }) => {
                     seedNumber: eventInfo['seed'].toString(),
                     winners: generateWinners({
                         rewards: Item.rewards,
-                        participants : eligibleParticipants.length === 0 ? participants : eligibleParticipants,
+                        participants: eligibleParticipants.length === 0 ? participants : eligibleParticipants,
                         seedNumber: eventInfo['seed'].toString()
                     })
                 }

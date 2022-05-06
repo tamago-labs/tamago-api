@@ -1,7 +1,7 @@
 const aws = require("@pulumi/aws");
 const awsx = require("@pulumi/awsx");
 
-const { headers } = require("./")
+const { headers } = require("./headers")
 
 exports.mainnet = async (event) => {
 

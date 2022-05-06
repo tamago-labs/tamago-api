@@ -6,7 +6,7 @@ const check = require('check-types');
 const { MerkleTree } = require('merkletreejs')
 const keccak256 = require("keccak256")
 
-const { headers } = require("./")
+const { headers } = require("./headers")
 const { getProvider } = require("../utils")
 const Order = require("../types/order")
 const { parseBody } = require("../utils")
@@ -153,7 +153,7 @@ const createOrder = async (event, tableName) => {
                 "confirmed": false,
                 "visible": false,
                 "canceled": false,
-                "locked" : false,
+                "locked": false,
                 "timestamp": Math.floor(new Date().valueOf() / 1000)
             }
 
