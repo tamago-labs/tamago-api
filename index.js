@@ -260,7 +260,7 @@ const certARN = "arn:aws:acm:us-east-1:057386374967:certificate/293cdab5-5dda-48
 // });
 
 exports.projectTable = projectTable.name
-
+exports.LuckboxApi = LuckboxApi.url;
 
 
 
