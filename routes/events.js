@@ -161,6 +161,100 @@ const createEvent = async (event, { dataTable, projectTable }) => {
 
 }
 
+//WIP
+const updateEvent = async (event, { dataTable, projectTable }) => {
+    try {
+        if (event && event.pathParameters) {
+
+            const base64String = event.pathParameters.proxy
+
+            const buff = Buffer.from(base64String, "base64");
+            const eventBodyStr = buff.toString('UTF-8');
+            const eventBody = JSON.parse(eventBodyStr);
+
+            console.log("Receiving payload : ", eventBody)
+
+            // example payload
+            // {
+            //     title : Naga DAO NFT,
+            //     description : 3x Naga DAO NFT rewards for 3 lucky owners who held Naga DAO NFT at the time of snapshot (Saturday, 26 March 2022, 00:00:00 UTC).,
+            //     imageUrl : https://img.tamago.finance/luckbox/event/event-2.png ,
+            //     claimStart : 1648252800, 
+            //     claimEnd : 1648684800 ,
+            //     snapshotDate : 1648252800,
+            //     chainId : 137,
+            //     community : Naga DAO,
+            //     owner : 0xaF00d9c1C7659d205e676f49Df51688C9f053740,
+            //     communityImageUrl : https://img.tamago.finance/luckbox/naga-dao-logo.png,
+            //     participants : [1,2,3]
+            //     rewards : [] 
+            // }
+            if (eventBody) {
+                const eventId = eventBody.eventId
+                let params = {
+                    TableName: dataTable,
+                    Key: {
+                        "key": "event",
+                        "value": eventId
+                    }
+                };
+                const _client = new aws.sdk.DynamoDB.DocumentClient()
+                let { Item } = await _client.get(params).promise()
+                console.log("Updating new event with ID : ", eventId)
+
+                const spots = eventBody.rewards.length
+                const requiredTimestamp = Number(eventBody.snapshotDate) || Number(eventBody.claimStart)
+                const _projectIDs = Item.participants || []
+                let { participants } = await getParticipants(requiredTimestamp, projectTable, _projectIDs)
+
+                const wallets = participants.length
+
+                params = {
+                    TableName: dataTable,
+                    // Key: { key: "event", value: `${eventId}` },
+                    Item: {
+                        ...eventBody,
+                        "key": "event",
+                        "value": `${eventId}`,
+                        "eventId": `${eventId}`,
+                        participants,
+                        wallets,
+                        spots,
+                    }
+                }
+
+                console.log("saving : ", params)
+                await _client.put(params).promise()
+
+                return {
+                    statusCode: 200,
+                    headers,
+                    body: JSON.stringify({
+                        "status": "ok",
+                        "eventId": eventId
+                    }),
+                }
+
+            } else {
+                throw new Error("Invalid JSON structure")
+            }
+
+        } else {
+            throw new Error("Params is not provided")
+        }
+    } catch (error) {
+        return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({
+                status: "error",
+                message: `Updating Error ${error}`
+            }),
+        };
+    }
+
+}
+
 const register = async (event, { dataTable }) => {
 
     try {
@@ -544,5 +638,6 @@ module.exports = {
     generateProof,
     createEvent,
     register,
-    getRegistered
+    getRegistered,
+    updateEvent,
 }

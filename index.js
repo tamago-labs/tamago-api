@@ -17,6 +17,7 @@ const {
     createEvent,
     getAllRewards,
     register,
+    updateEvent,
     getRegistered,
     getAllOrders,
     createOrder,
@@ -159,6 +160,7 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
             path: "/events/{proxy+}",
             eventHandler: async (event) => await getEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
         },
+
         {
             method: "GET",
             path: "/events/proof/{proxy+}",
@@ -178,6 +180,11 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
             method: "GET",
             path: "/register/{proxy+}",
             eventHandler: async (event) => await register(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
+        },
+        {
+            method: "GET",
+            path: "/updateEvent/{proxy+}",
+            eventHandler: async (event) => await updateEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
         },
         {
             method: "GET",
