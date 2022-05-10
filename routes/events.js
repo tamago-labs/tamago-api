@@ -202,28 +202,32 @@ const updateEvent = async (event, { dataTable, projectTable }) => {
                 let { Item } = await _client.get(params).promise()
                 console.log("Updating new event with ID : ", eventId)
 
-                const spots = eventBody.rewards.length
+
                 const requiredTimestamp = Number(eventBody.snapshotDate) || Number(eventBody.claimStart)
                 const _projectIDs = Item.participants || []
                 let { participants } = await getParticipants(requiredTimestamp, projectTable, _projectIDs)
 
-                const wallets = participants.length
 
-                params = {
-                    TableName: dataTable,
-                    // Key: { key: "event", value: `${eventId}` },
-                    Item: {
-                        ...eventBody,
-                        "key": "event",
-                        "value": `${eventId}`,
-                        "eventId": `${eventId}`,
-                        participants,
-                        wallets,
-                        spots,
-                    }
+                const updateData = {
+                    ...eventBody, "key": "event",
+                    "value": `${eventId}`,
+                    "eventId": `${eventId}`,
+                    participants,
                 }
 
-                console.log("saving : ", params)
+                if (updateData && check.like(updateData, Event)) {
+                    const spots = eventBody.rewards.length
+                    const wallets = participants.length
+                    console.log("saving : ", params)
+                    params = {
+                        TableName: dataTable,
+                        // Key: { key: "event", value: `${eventId}` },
+                        Item: { ...updateData, spots, wallets, }
+
+                    }
+
+                }
+
                 await _client.put(params).promise()
 
                 return {
