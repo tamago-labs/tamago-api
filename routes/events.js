@@ -10,7 +10,7 @@ const { headers } = require("./headers")
 const { LUCKBOX_ABI } = require("../abi")
 const Event = require("../types/event")
 const Registration = require("../types/registration")
-const { generateWinners, finalizeWinners, getProvider } = require("../utils")
+const { generateWinners, finalizeWinners, getProvider, parseBody } = require("../utils")
 
 const getParticipants = async (currentTimestamp, projectTable, projectIds) => {
 
@@ -161,7 +161,118 @@ const createEvent = async (event, { dataTable, projectTable }) => {
 
 }
 
-//WIP
+//to be editted
+const _createEvent = async (event, { dataTable, projectTable }) => {
+
+    console.log("creating ")
+    try {
+        if (event) {
+
+            // const base64String = event.pathParameters.proxy
+
+            // const buff = Buffer.from(base64String, "base64");
+            // const eventBodyStr = buff.toString('UTF-8');
+            // const eventBody = JSON.parse(eventBodyStr);
+            const body = parseBody(event)
+
+
+            console.log("Receiving payload : ", body)
+
+            // example payload
+            // {
+            //     title : Naga DAO NFT,
+            //     description : 3x Naga DAO NFT rewards for 3 lucky owners who held Naga DAO NFT at the time of snapshot (Saturday, 26 March 2022, 00:00:00 UTC).,
+            //     imageUrl : https://img.tamago.finance/luckbox/event/event-2.png ,
+            //     claimStart : 1648252800, 
+            //     claimEnd : 1648684800 ,
+            //     snapshotDate : 1648252800,
+            //     chainId : 137,
+            //     community : Naga DAO,
+            //     owner : 0xaF00d9c1C7659d205e676f49Df51688C9f053740,
+            //     communityImageUrl : https://img.tamago.finance/luckbox/naga-dao-logo.png,
+            //     participants : [1,2,3]
+            //     rewards : [] 
+            // }
+
+            if (body && check.like(body, Event)) {
+
+                // looks for Event ID
+                let params = {
+                    TableName: dataTable,
+                    KeyConditionExpression: "#key = :key",
+                    ExpressionAttributeNames: {
+                        "#key": "key"
+                    },
+                    ExpressionAttributeValues: {
+                        ":key": "event"
+                    },
+                    ProjectionExpression: "eventId"
+                };
+
+                const client = new aws.sdk.DynamoDB.DocumentClient()
+                const { Items } = await client.query(params).promise()
+
+                const eventId = Items.reduce((result, item) => {
+                    if (Number(item.eventId) > result) {
+                        result = Number(item.eventId)
+                    }
+                    return result
+                }, 0) + 1
+
+                console.log("Adding new event with ID : ", eventId)
+
+                const spots = body.rewards.length
+                const requiredTimestamp = Number(body.snapshotDate) || Number(body.claimStart)
+
+                const participants = await getParticipants(requiredTimestamp, projectTable, body.participants)
+
+                const wallets = participants.length
+
+                params = {
+                    TableName: dataTable,
+                    Item: {
+                        ...body,
+                        "key": "event",
+                        "value": `${eventId}`,
+                        "eventId": `${eventId}`,
+                        spots,
+                        wallets
+                    }
+                }
+
+                console.log("saving : ", params)
+
+                await client.put(params).promise()
+
+                return {
+                    statusCode: 200,
+                    headers,
+                    body: JSON.stringify({
+                        "status": "ok",
+                        "eventId": eventId
+                    }),
+                }
+
+            } else {
+                throw new Error("Invalid JSON structure")
+            }
+
+        } else {
+            throw new Error("Body is not provided")
+        }
+    } catch (error) {
+        return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({
+                status: "error",
+                message: `${error.message || "Unknown error."}`
+            }),
+        };
+    }
+
+}
+
 const updateEvent = async (event, { dataTable, projectTable }) => {
     try {
         if (event && event.pathParameters) {
@@ -641,6 +752,7 @@ module.exports = {
     getEvent,
     generateProof,
     createEvent,
+    _createEvent,
     register,
     getRegistered,
     updateEvent,

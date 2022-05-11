@@ -15,6 +15,7 @@ const {
     getAccount,
     createAccount,
     createEvent,
+    _createEvent,
     getAllRewards,
     register,
     updateEvent,
@@ -173,7 +174,11 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
         },
 
         //create new endpoint method:'POST' remove proxy, send payload in request body, path : /createevents/
-
+        {
+            method: "POST",
+            path: "/events/create",
+            eventHandler: async (event) => await _createEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
+        },
 
         {
             method: "GET",
@@ -236,7 +241,7 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
     ]
 })
 
-// PRODUCTION constants 
+// // PRODUCTION constants 
 const domainName = "api.tamago.finance";
 const route53DomainZoneId = "Z0280059321XPD7H3US7L";
 const certARN = "arn:aws:acm:us-east-1:057386374967:certificate/293cdab5-5dda-48bc-a120-4c96c9dd7dab";
