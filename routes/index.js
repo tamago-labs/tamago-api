@@ -1,6 +1,6 @@
 const { mainnet, polygon, bsc } = require("./angpow")
 const { getAllProjects, getProject } = require("./projects")
-const { getAllEvents, getEvent, generateProof, createEvent, register, getRegistered, updateEvent } = require("./events")
+const { getAllEvents, getEvent, generateProof, createEvent, _createEvent, register, getRegistered, updateEvent } = require("./events")
 const { getAccount, createAccount } = require("./account")
 const { getAllRewards } = require("./rewards")
 const { getAllOrders, createOrder, getOrder, confirmOrder, cancelOrder } = require("./orders")
@@ -20,6 +20,7 @@ module.exports = {
     getAccount,
     createAccount,
     createEvent,
+    _createEvent,
     getAllRewards,
     register,
     getRegistered,
