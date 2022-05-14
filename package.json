@@ -18,6 +18,7 @@
     },
     "scripts": {
         "fetch-holders": "node ./services/fetch-holders/index.js",
-        "fetch-holders-all": "pm2 start ecosystem.config.js && pm2 stop all"
+        "fetch-holders-all": "pm2 start ecosystem.config.js && pm2 stop all",
+        "order-trails" : "node ./services/order-trails/index.js"
     }
 }
