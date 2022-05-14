@@ -37,7 +37,7 @@ const getAllOrders = async (event, tableName) => {
             headers,
             body: JSON.stringify({
                 status: "ok",
-                orders: Items
+                orders: Items.filter(item => item.visible)
             }),
         }
 
@@ -55,8 +55,6 @@ const getAllOrders = async (event, tableName) => {
 
 const getOrder = async (event, tableName) => {
 
-    console.log("Confirming an order")
-
     try {
 
         let orderId
@@ -72,8 +70,8 @@ const getOrder = async (event, tableName) => {
         const params = {
             TableName: tableName,
             Key: {
-                "key": "order",
-                "value": orderId
+                "version": 1,
+                "orderId": Number(orderId)
             }
         };
 
@@ -119,7 +117,7 @@ const createOrder = async (event, tableName) => {
 
         console.log("BODY: \n", body)
 
-        if (body && check.like(body, Order)) {
+        if (body) {
 
             // looks for Order ID
             let params = {
@@ -162,9 +160,9 @@ const createOrder = async (event, tableName) => {
                 Item: orderItem
             }
 
-            if (!check.like(orderItem, Order)) {
-                throw new Error("Invalid JSON structure")
-            }
+            // if (!check.like(orderItem, Order)) {
+            //     throw new Error("Invalid JSON structure")
+            // }
 
             console.log("saving : ", params)
 

@@ -10,6 +10,9 @@ const Order = {
     fulfilled: false,
     crosschain: false,
     locked: false,
+    title: "Hello",
+    category: "DAO",
+    slug: "hello-1234",
     ownerAddress: "0xaF00d9c1C7659d205e676f49Df51688C9f053740",
     baseAssetAddress: "0xaF00d9c1C7659d205e676f49Df51688C9f053740",
     baseAssetTokenId: 1,
@@ -19,7 +22,7 @@ const Order = {
             assetAddress: "0xaF00d9c1C7659d205e676f49Df51688C9f053740",
             assetTokenIdOrAmount: "1",
             tokenType: 1,
-            chainIds : []
+            chainId: 42
         }
     ]
 }
