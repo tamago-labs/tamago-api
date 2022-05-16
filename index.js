@@ -34,6 +34,13 @@ const Headers = {
     "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
 }
 
+const bucket = new aws.s3.Bucket("images", {
+    acl: "public-read", tags: {
+        Environment: "Dev",
+        Name: "images",
+    },
+});
+
 const dataTable = new aws.dynamodb.Table(
     "dataTable",
     {
@@ -177,7 +184,7 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
         {
             method: "POST",
             path: "/events/create",
-            eventHandler: async (event) => await _createEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
+            eventHandler: async (event) => await _createEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get(), bucket })
         },
 
         {
@@ -242,44 +249,44 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
 })
 
 // // PRODUCTION constants 
-const domainName = "api.tamago.finance";
-const route53DomainZoneId = "Z0280059321XPD7H3US7L";
-const certARN = "arn:aws:acm:us-east-1:057386374967:certificate/293cdab5-5dda-48bc-a120-4c96c9dd7dab";
+// const domainName = "api.tamago.finance";
+// const route53DomainZoneId = "Z0280059321XPD7H3US7L";
+// const certARN = "arn:aws:acm:us-east-1:057386374967:certificate/293cdab5-5dda-48bc-a120-4c96c9dd7dab";
 
 
 
-const domain = new aws.apigateway.DomainName("domain", {
-    certificateArn: certARN,
-    domainName: domainName,
-});
+// const domain = new aws.apigateway.DomainName("domain", {
+//     certificateArn: certARN,
+//     domainName: domainName,
+// });
 
-const mapping = new aws.apigateway.BasePathMapping("mapping", {
-    restApi: angpowApi.restAPI,
-    basePath: "lucky-red-envelope",
-    stageName: angpowApi.stage.stageName,
-    domainName: domain.domainName,
-});
+// const mapping = new aws.apigateway.BasePathMapping("mapping", {
+//     restApi: angpowApi.restAPI,
+//     basePath: "lucky-red-envelope",
+//     stageName: angpowApi.stage.stageName,
+//     domainName: domain.domainName,
+// });
 
-const mapping2 = new aws.apigateway.BasePathMapping("mapping-2", {
-    restApi: LuckboxApi.restAPI,
-    basePath: "v2",
-    stageName: LuckboxApi.stage.stageName,
-    domainName: domain.domainName,
-});
+// const mapping2 = new aws.apigateway.BasePathMapping("mapping-2", {
+//     restApi: LuckboxApi.restAPI,
+//     basePath: "v2",
+//     stageName: LuckboxApi.stage.stageName,
+//     domainName: domain.domainName,
+// });
 
-const record = new aws.route53.Record("record", {
-    type: "A",
-    zoneId: route53DomainZoneId,
-    name: domainName,
-    aliases: [{
-        name: domain.cloudfrontDomainName,
-        zoneId: domain.cloudfrontZoneId,
-        evaluateTargetHealth: true,
-    }],
-});
+// const record = new aws.route53.Record("record", {
+//     type: "A",
+//     zoneId: route53DomainZoneId,
+//     name: domainName,
+//     aliases: [{
+//         name: domain.cloudfrontDomainName,
+//         zoneId: domain.cloudfrontZoneId,
+//         evaluateTargetHealth: true,
+//     }],
+// });
 
 exports.projectTable = projectTable.name
 exports.LuckboxApi = LuckboxApi.url;
-
+exports.bucketName = bucket.id;
 
 
