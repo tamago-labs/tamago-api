@@ -26,7 +26,7 @@ const getAllOrders = async (event, tableName) => {
             ExpressionAttributeValues: {
                 ":version": 1
             },
-            // ProjectionExpression: "orderId"
+            ProjectionExpression: "version, orderId, chainId, baseAssetAddress, baseAssetTokenId, category, title, confirmed, visible, fulfilled, canceled, locked, ownerAddress"
         };
 
         const client = new aws.sdk.DynamoDB.DocumentClient()
@@ -314,7 +314,7 @@ const cancelOrder = async (event, tableName) => {
             if (recoveredAddress.toLowerCase() === ownerAddress.toLowerCase()) {
 
                 Item["canceled"] = true
-                Item["visible"] = false
+                // Item["visible"] = false
 
                 params = {
                     TableName: tableName,
