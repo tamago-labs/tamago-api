@@ -318,29 +318,7 @@ const _createEvent = async (event, { dataTable, projectTable, bucket }) => {
                 secretAccessKey
             })
 
-            // example payload
-            // {
-            //     title : Naga DAO NFT,
-            //     description : 3x Naga DAO NFT rewards for 3 lucky owners who held Naga DAO NFT at the time of snapshot (Saturday, 26 March 2022, 00:00:00 UTC).,
-            //     imageUrl : https://img.tamago.finance/luckbox/event/event-2.png ,
-            //     claimStart : 1648252800, 
-            //     claimEnd : 1648684800 ,
-            //     snapshotDate : 1648252800,
-            //     chainId : 137,
-            //     community : Naga DAO,
-            //     owner : 0xaF00d9c1C7659d205e676f49Df51688C9f053740,
-            //     communityImageUrl : https://img.tamago.finance/luckbox/naga-dao-logo.png,
-            //     participants : [1,2,3]
-            //     rewards : [] 
-            // }
-
             if (body && check.like(body, Event)) {
-
-                console.log("line202")
-                // const s3 = new AWS.S3({
-                //     accessKeyId,
-                //     secretAccessKey
-                // })
 
                 const fileContent = Buffer.from(body.imageUrl.replace(/^data:image\/\w+;base64,/, ""), 'base64')
                 var arr = body.imageUrl.split(',')
@@ -358,7 +336,7 @@ const _createEvent = async (event, { dataTable, projectTable, bucket }) => {
 
                 const s3Params = {
                     Key: body.slug + String(Date.parse(new Date())).slice(-10, -3),
-                    Bucket: "images-b70d9d1",
+                    Bucket: bucket.bucket,
                     Body: fileContent,
                     ContentEncoding: 'base64',
                     ContentType: 'image/jpeg'

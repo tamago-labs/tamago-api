@@ -34,12 +34,7 @@ const Headers = {
     "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
 }
 
-const bucket = new aws.s3.Bucket("images", {
-    acl: "public-read", tags: {
-        Environment: "Dev",
-        Name: "images",
-    },
-});
+const imageBucket = new aws.s3.Bucket("luckbox-images");
 
 const dataTable = new aws.dynamodb.Table(
     "dataTable",
@@ -184,7 +179,7 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
         {
             method: "POST",
             path: "/events/create",
-            eventHandler: async (event) => await _createEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get(), bucket })
+            eventHandler: async (event) => await _createEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get(), imageBucket })
         },
 
         {
@@ -254,6 +249,29 @@ const route53DomainZoneId = "Z0280059321XPD7H3US7L";
 const certARN = "arn:aws:acm:us-east-1:057386374967:certificate/293cdab5-5dda-48bc-a120-4c96c9dd7dab";
 
 
+// Create an S3 Bucket Policy to allow public read of all objects in bucket
+const publicReadPolicyForBucket = (bucketName) => {
+    return {
+        Version: "2012-10-17",
+        Statement: [{
+            Effect: "Allow",
+            Principal: "*",
+            Action: [
+                "s3:GetObject"
+            ],
+            Resource: [
+                `arn:aws:s3:::${bucketName}/*` // policy refers to bucket name explicitly
+            ]
+        }]
+    };
+}
+
+// Set the access policy for the bucket so all objects are readable
+let bucketPolicy = new aws.s3.BucketPolicy("bucketPolicy", {
+    bucket: imageBucket.bucket, // refer to the bucket created earlier
+    policy: imageBucket.bucket.apply(publicReadPolicyForBucket) // use output property `siteBucket.bucket`
+});
+
 
 const domain = new aws.apigateway.DomainName("domain", {
     certificateArn: certARN,
@@ -287,6 +305,7 @@ const record = new aws.route53.Record("record", {
 
 exports.projectTable = projectTable.name
 exports.LuckboxApi = LuckboxApi.url;
-exports.bucketName = bucket.id;
+exports.bucketName = imageBucket.bucket;
+exports.websiteUrl = imageBucket.websiteEndpoint;
 
 
