@@ -14,6 +14,7 @@ const {
     generateProof,
     getAccount,
     createAccount,
+    createAccountWithSigning,
     createEvent,
     _createEvent,
     getAllRewards,
@@ -143,6 +144,11 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
 
 const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
     routes: [
+        {
+            method : "POST",
+            path: "/account",
+            eventHandler: async (event) => await createAccountWithSigning(event, dataTable.name.get())
+        },
         {
             method: "GET",
             path: "/projects",
