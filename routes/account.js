@@ -6,7 +6,7 @@ const { ethers } = require("ethers");
 const Account = require("../types/account")
 const { parseBody } = require("../utils")
 
-const { headers } = require("./")
+const { headers } = require("./headers")
 
 const getAccount = async (event, tableName) => {
 
