@@ -4,7 +4,7 @@ const awsx = require("@pulumi/awsx");
 const check = require('check-types');
 const Account = require("../types/account")
 
-const { headers } = require("./")
+const { headers } = require("./headers")
 
 const getAccount = async (event, tableName) => {
 

@@ -1,3 +1,5 @@
+
+
 const { ethers } = require("ethers");
 
 const generateWinners = ({
@@ -90,9 +92,38 @@ const parseBody = (event) => {
     return body
 }
 
+const base64ToImage = (dataurl, filename) => {
+
+    // var arr = dataurl.split(','),
+    //     mime = arr[0].match(/:(.*?);/)[1],
+    //     bstr = atob(arr[1]),
+    //     n = bstr.length,
+    //     u8arr = new Uint8Array(n);
+
+    // while (n--) {
+    //     u8arr[n] = bstr.charCodeAt(n);
+    // }
+
+    // let extension = ""
+    // switch (arr[1][0]) {
+    //     case '/': extension = '.jpg'
+    //         break;
+    //     case 'i': extension = '.png'
+    //         break;
+    //     case 'R': extension = '.gif'
+    //         break;
+    //     case 'U': extension = '.webp'
+    //         break;
+
+    // }
+
+    // return new File([u8arr], filename + extension, { type: mime });
+}
+
 module.exports = {
     generateWinners,
     finalizeWinners,
     getProvider,
-    parseBody
+    parseBody,
+
 }

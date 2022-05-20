@@ -15,8 +15,10 @@ const {
     getAccount,
     createAccount,
     createEvent,
+    _createEvent,
     getAllRewards,
     register,
+    updateEvent,
     getRegistered,
     getAllOrders,
     createOrder,
@@ -31,6 +33,8 @@ const Headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
 }
+
+const imageBucket = new aws.s3.Bucket("luckbox-images");
 
 const dataTable = new aws.dynamodb.Table(
     "dataTable",
@@ -159,6 +163,7 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
             path: "/events/{proxy+}",
             eventHandler: async (event) => await getEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
         },
+
         {
             method: "GET",
             path: "/events/proof/{proxy+}",
@@ -169,6 +174,14 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
             path: "/events/registered/{proxy+}",
             eventHandler: async (event) => await getRegistered(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
         },
+
+        //create new endpoint method:'POST' remove proxy, send payload in request body, path : /createevents/
+        {
+            method: "POST",
+            path: "/events/create",
+            eventHandler: async (event) => await _createEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get(), imageBucket })
+        },
+
         {
             method: "GET",
             path: "/createEvent/{proxy+}",
@@ -178,6 +191,11 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
             method: "GET",
             path: "/register/{proxy+}",
             eventHandler: async (event) => await register(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
+        },
+        {
+            method: "GET",
+            path: "/updateEvent/{proxy+}",
+            eventHandler: async (event) => await updateEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
         },
         {
             method: "GET",
@@ -225,9 +243,35 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
     ]
 })
 
+// // PRODUCTION constants 
 const domainName = "api.tamago.finance";
 const route53DomainZoneId = "Z0280059321XPD7H3US7L";
 const certARN = "arn:aws:acm:us-east-1:057386374967:certificate/293cdab5-5dda-48bc-a120-4c96c9dd7dab";
+
+
+// Create an S3 Bucket Policy to allow public read of all objects in bucket
+const publicReadPolicyForBucket = (bucketName) => {
+    return {
+        Version: "2012-10-17",
+        Statement: [{
+            Effect: "Allow",
+            Principal: "*",
+            Action: [
+                "s3:GetObject"
+            ],
+            Resource: [
+                `arn:aws:s3:::${bucketName}/*` // policy refers to bucket name explicitly
+            ]
+        }]
+    };
+}
+
+// Set the access policy for the bucket so all objects are readable
+let bucketPolicy = new aws.s3.BucketPolicy("bucketPolicy", {
+    bucket: imageBucket.bucket, // refer to the bucket created earlier
+    policy: imageBucket.bucket.apply(publicReadPolicyForBucket) // use output property `siteBucket.bucket`
+});
+
 
 const domain = new aws.apigateway.DomainName("domain", {
     certificateArn: certARN,
@@ -260,6 +304,8 @@ const record = new aws.route53.Record("record", {
 });
 
 exports.projectTable = projectTable.name
-
+exports.LuckboxApi = LuckboxApi.url;
+exports.bucketName = imageBucket.bucket;
+exports.websiteUrl = imageBucket.websiteEndpoint;
 
 

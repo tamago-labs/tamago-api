@@ -1,16 +1,11 @@
-const { mainnet , polygon, bsc } = require("./angpow")
+const { mainnet, polygon, bsc } = require("./angpow")
 const { getAllProjects, getProject } = require("./projects")
-const { getAllEvents, getEvent, generateProof, createEvent, register , getRegistered } = require("./events")
+const { getAllEvents, getEvent, generateProof, createEvent, _createEvent, register, getRegistered, updateEvent } = require("./events")
 const { getAccount, createAccount } = require("./account")
 const { getAllRewards } = require("./rewards")
-const { getAllOrders, createOrder, getOrder, confirmOrder, cancelOrder  } = require("./orders")
+const { getAllOrders, createOrder, getOrder, confirmOrder, cancelOrder } = require("./orders")
 const { getCollections } = require("./collections")
-
-const headers = {
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
-}
+const { headers } = require("./headers")
 
 module.exports = {
     mainnet,
@@ -25,9 +20,11 @@ module.exports = {
     getAccount,
     createAccount,
     createEvent,
+    _createEvent,
     getAllRewards,
     register,
     getRegistered,
+    updateEvent,
     getAllOrders,
     createOrder,
     getOrder,
