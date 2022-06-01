@@ -5,6 +5,7 @@ const { getAccount, createAccount, createAccountWithSigning } = require("./accou
 const { getAllRewards } = require("./rewards")
 const { getAllOrders, createOrder, getOrder, confirmOrder, cancelOrder } = require("./orders")
 const { getCollections } = require("./collections")
+const { proxy } = require("./utils")
 const { headers } = require("./headers")
 
 module.exports = {
@@ -31,5 +32,6 @@ module.exports = {
     confirmOrder,
     cancelOrder,
     getCollections,
-    createAccountWithSigning
+    createAccountWithSigning,
+    proxy
 }
