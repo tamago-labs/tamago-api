@@ -26,7 +26,8 @@ const {
     getOrder,
     confirmOrder,
     cancelOrder,
-    getCollections
+    getCollections,
+    proxy
 } = require("./routes")
 
 const Headers = {
@@ -117,21 +118,6 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
     routes: [
         {
             method: "GET",
-            path: "/{proxy+}",
-            eventHandler: async (event) => await mainnet(event)
-        },
-        {
-            method: "GET",
-            path: "/polygon/{proxy+}",
-            eventHandler: async (event) => await polygon(event)
-        },
-        {
-            method: "GET",
-            path: "/bsc/{proxy+}",
-            eventHandler: async (event) => await bsc(event)
-        },
-        {
-            method: "GET",
             path: "/account/{proxy+}",
             eventHandler: async (event) => await getAccount(event, dataTable.name.get())
         },
@@ -145,7 +131,7 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
 const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
     routes: [
         {
-            method : "POST",
+            method: "POST",
             path: "/account",
             eventHandler: async (event) => await createAccountWithSigning(event, dataTable.name.get())
         },
@@ -245,7 +231,12 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
             method: "GET",
             path: "/collections",
             eventHandler: async (event) => await getCollections(event, collectionTable.name.get())
-        }
+        },
+        {
+            method: "GET",
+            path: "/proxy/{proxy+}",
+            eventHandler: async (event) => await proxy(event)
+        },
     ]
 })
 
