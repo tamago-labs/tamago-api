@@ -14,9 +14,6 @@ const { generateWinners, finalizeWinners, getProvider, parseBody, dataURLtoFile 
 const { accessKeyId, secretAccessKey, region } = require("../config.json");
 const { allowedAccountIds } = require("@pulumi/aws/config");
 
-
-
-
 const getParticipants = async (currentTimestamp, projectTable, projectIds) => {
 
     // find the timestamp
@@ -565,9 +562,13 @@ const getEvent = async (event, { dataTable, projectTable }) => {
                         })
                     }
 
+                    console.log("here...")
+
                     onchainData.winners = await finalizeWinners(luckboxContract, onchainData)
                     totalWinners = onchainData.winners.length
                 }
+
+                console.log("and here...")
 
                 return {
                     statusCode: 200,

@@ -184,9 +184,7 @@ const createAccountWithSigning = async (event, tableName) => {
             }),
         };
     }
-
 }
-
 
 module.exports = {
     getAccount,
