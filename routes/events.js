@@ -166,149 +166,12 @@ const createEvent = async (event, { dataTable, projectTable }) => {
 
 }
 
-//to be editted
-// const _createEvent = async (event, { dataTable, projectTable, bucket }) => {
-
-//     console.log("creating ")
-//     try {
-//         if (event) {
-
-//             // const base64String = event.pathParameters.proxy
-
-//             // const buff = Buffer.from(base64String, "base64");
-//             // const eventBodyStr = buff.toString('UTF-8');
-//             // const eventBody = JSON.parse(eventBodyStr);
-//             const body = parseBody(event)
-
-//             console.log("Receiving payload : ", body)
-
-//             // example payload
-//             // {
-//             //     title : Naga DAO NFT,
-//             //     description : 3x Naga DAO NFT rewards for 3 lucky owners who held Naga DAO NFT at the time of snapshot (Saturday, 26 March 2022, 00:00:00 UTC).,
-//             //     imageUrl : https://img.tamago.finance/luckbox/event/event-2.png ,
-//             //     claimStart : 1648252800, 
-//             //     claimEnd : 1648684800 ,
-//             //     snapshotDate : 1648252800,
-//             //     chainId : 137,
-//             //     community : Naga DAO,
-//             //     owner : 0xaF00d9c1C7659d205e676f49Df51688C9f053740,
-//             //     communityImageUrl : https://img.tamago.finance/luckbox/naga-dao-logo.png,
-//             //     participants : [1,2,3]
-//             //     rewards : [] 
-//             // }
-
-//             if (body && check.like(body, Event)) {
-
-//                 console.log("line202")
-//                 const s3 = new AWS.S3({
-//                     accessKeyId,
-//                     secretAccessKey
-//                 })
-
-//                 const fileContent = dataURLtoFile(body.imageUrl, body.slug)
-
-
-
-//                 const s3Params = {
-//                     Bucket: "images-b70d9d1",
-//                     Key: fileContent.name,
-//                     Body: fileContent
-//                 }
-
-//                 console.log({ s3Params })
-//                 const uploadedImage = await s3.upload(s3Params).promise()
-//                 console.log("line219 ", { uploadedImage })
-//                 const newBody = { ...body, imageUrl: uploadedImage.Location }
-//                 console.log("Updating imageUrl: ", newBody)
-//                 // looks for Event ID
-//                 let params = {
-//                     TableName: dataTable,
-//                     KeyConditionExpression: "#key = :key",
-//                     ExpressionAttributeNames: {
-//                         "#key": "key"
-//                     },
-//                     ExpressionAttributeValues: {
-//                         ":key": "event"
-//                     },
-//                     ProjectionExpression: "eventId"
-//                 };
-
-//                 const client = new aws.sdk.DynamoDB.DocumentClient()
-//                 const { Items } = await client.query(params).promise()
-
-//                 const eventId = Items.reduce((result, item) => {
-//                     if (Number(item.eventId) > result) {
-//                         result = Number(item.eventId)
-//                     }
-//                     return result
-//                 }, 0) + 1
-
-//                 console.log("Adding new event with ID : ", eventId)
-
-//                 const spots = body.rewards.length
-//                 const requiredTimestamp = Number(body.snapshotDate) || Number(body.claimStart)
-
-//                 const participants = await getParticipants(requiredTimestamp, projectTable, body.participants)
-
-//                 const wallets = participants.length
-
-//                 params = {
-//                     TableName: dataTable,
-//                     Item: {
-//                         ...newBody,
-//                         "key": "event",
-//                         "value": `${eventId}`,
-//                         "eventId": `${eventId}`,
-//                         spots,
-//                         wallets
-//                     }
-//                 }
-
-//                 console.log("saving : ", params)
-
-//                 await client.put(params).promise()
-
-//                 return {
-//                     statusCode: 200,
-//                     headers,
-//                     body: JSON.stringify({
-//                         "status": "ok",
-//                         "eventId": eventId
-//                     }),
-//                 }
-
-//             } else {
-//                 throw new Error("Invalid JSON structure")
-//             }
-
-//         } else {
-//             throw new Error("Body is not provided")
-//         }
-//     } catch (error) {
-//         return {
-//             statusCode: 400,
-//             headers,
-//             body: JSON.stringify({
-//                 status: "error",
-//                 message: `${error || "Unknown error."}`
-//             }),
-//         };
-//     }
-
-// }
-
 const _createEvent = async (event, { dataTable, projectTable, bucket }) => {
 
     console.log("creating ")
     try {
         if (event) {
 
-            // const base64String = event.pathParameters.proxy
-
-            // const buff = Buffer.from(base64String, "base64");
-            // const eventBodyStr = buff.toString('UTF-8');
-            // const eventBody = JSON.parse(eventBodyStr);
             const body = parseBody(event)
 
             console.log("Receiving payload : ", body)
@@ -336,23 +199,17 @@ const _createEvent = async (event, { dataTable, projectTable, bucket }) => {
 
                 const s3Params = {
                     Key: body.slug + String(Date.parse(new Date())).slice(-10, -3),
-                    Bucket: bucket.bucket,
+                    Bucket: `${bucket['bucket'].value}`,
                     Body: fileContent,
                     ContentEncoding: 'base64',
-                    ContentType: 'image/jpeg'
+                    ContentType: contentType
                 }
 
-                // await bucket.upload(s3Params, function (err, data) {
-                //     if (err) {
-                //         console.log(err);
-                //         console.log('Error uploading data: ', data);
-                //     } else {
-                //         console.log('successfully uploaded the image!');
-                //     }
-                // });
                 console.log({ s3Params })
                 const uploadedImage = await s3.upload(s3Params).promise()
-                console.log("line219 ", { uploadedImage })
+
+                console.log("Upload images completed")
+
                 const newBody = { ...body, imageUrl: uploadedImage.Location }
                 console.log("Updating imageUrl: ", newBody)
                 // looks for Event ID
@@ -383,10 +240,6 @@ const _createEvent = async (event, { dataTable, projectTable, bucket }) => {
                 const spots = body.rewards.length
                 const requiredTimestamp = Number(body.snapshotDate) || Number(body.claimStart)
 
-                const participants = await getParticipants(requiredTimestamp, projectTable, body.participants)
-
-                const wallets = participants.length
-
                 params = {
                     TableName: dataTable,
                     Item: {
@@ -395,7 +248,7 @@ const _createEvent = async (event, { dataTable, projectTable, bucket }) => {
                         "value": `${eventId}`,
                         "eventId": `${eventId}`,
                         spots,
-                        wallets
+                        wallets : 0
                     }
                 }
 

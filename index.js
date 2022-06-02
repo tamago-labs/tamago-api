@@ -171,7 +171,7 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
         {
             method: "POST",
             path: "/events/create",
-            eventHandler: async (event) => await _createEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get(), imageBucket })
+            eventHandler: async (event) => await _createEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get(), bucket : imageBucket })
         },
 
         {
