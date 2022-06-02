@@ -153,7 +153,10 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
         {
             method: "GET",
             path: "/events/{proxy+}",
-            eventHandler: async (event) => await getEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() })
+            eventHandler: new aws.lambda.CallbackFunction("getEvent", {
+                memorySize: 512,
+                callback: async (event) => await getEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() }),
+            })
         },
 
         {
@@ -171,7 +174,7 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
         {
             method: "POST",
             path: "/events/create",
-            eventHandler: async (event) => await _createEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get(), bucket : imageBucket })
+            eventHandler: async (event) => await _createEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get(), bucket: imageBucket })
         },
 
         {

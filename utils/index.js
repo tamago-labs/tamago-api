@@ -52,7 +52,7 @@ const finalizeWinners = async (luckboxContract, { seedNumber, winners }) => {
             }
         }
 
-        return await Promise.all(winners.map(item => getAsset(item)))
+        return await Promise.all(winners.splice(0, 20).map(item => getAsset(item)))
 
     } else {
         return []
