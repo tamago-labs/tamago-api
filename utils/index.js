@@ -8,6 +8,8 @@ const generateWinners = ({
     seedNumber
 }) => {
 
+    console.log("Generating winner list : ", rewards, participants, seedNumber)
+
     const totalWinners = rewards.length
 
     participants = participants.sort()
@@ -16,13 +18,13 @@ const generateWinners = ({
 
     while (true) {
 
-        const index = (ethers.BigNumber.from(`${seedNumber}`).mod(ethers.BigNumber.from(participants.length)))
+        const index = ((ethers.utils.bigNumberify(`${seedNumber}`)).mod(ethers.utils.bigNumberify((`${participants.length}`))))
 
         if (output.indexOf(participants[Number(index)]) === -1) {
             output.push(participants[Number(index)])
         }
 
-        seedNumber = ethers.BigNumber.from(ethers.utils.keccak256(ethers.BigNumber.from(`${seedNumber}`))).toString()
+        seedNumber = `${ethers.utils.bigNumberify(`${ethers.utils.keccak256(ethers.utils.bigNumberify(`${seedNumber}`))}`)}`
 
         if (output.length >= totalWinners) {
             break
