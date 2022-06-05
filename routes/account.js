@@ -32,6 +32,7 @@ const getAccount = async (event, tableName) => {
                     status: "ok",
                     account: accountId,
                     email: Item.email,
+                    nickname : Item.nickname,
                     disabled: Item.disabled
                 }),
             }
@@ -49,7 +50,7 @@ const getAccount = async (event, tableName) => {
 
 }
 
-
+// no longer used
 const createAccount = async (event, tableName) => {
 
     try {
@@ -132,7 +133,7 @@ const createAccountWithSigning = async (event, tableName) => {
 
         console.log("BODY: \n", body)
 
-        const { username, address, disabled, email, message, signature } = body
+        const { username, address, disabled, email, message, signature, nickname } = body
 
         // verify the address
         console.log("Verifying the address :  ", address)
@@ -147,6 +148,7 @@ const createAccountWithSigning = async (event, tableName) => {
                 TableName: tableName,
                 Item: {
                     username,
+                    nickname,
                     address,
                     disabled,
                     email,

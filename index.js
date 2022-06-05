@@ -13,7 +13,6 @@ const {
     getEvent,
     generateProof,
     getAccount,
-    createAccount,
     createAccountWithSigning,
     createEvent,
     _createEvent,
@@ -120,10 +119,6 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
             method: "GET",
             path: "/account/{proxy+}",
             eventHandler: async (event) => await getAccount(event, dataTable.name.get())
-        },
-        // FIXME: sign the message and verify before add a new record / use POST method and fix CORS issues
-        {
-            method: "GET", path: "/accountUpdate/{proxy+}", eventHandler: async (event) => await createAccount(event, dataTable.name.get()),
         }
     ]
 });
@@ -131,19 +126,9 @@ const angpowApi = new awsx.apigateway.API("angpow-api", {
 const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
     routes: [
         {
-            method: "POST",
-            path: "/account",
-            eventHandler: async (event) => await createAccountWithSigning(event, dataTable.name.get())
-        },
-        {
             method: "GET",
-            path: "/projects",
-            eventHandler: async (event) => await getAllProjects(event)
-        },
-        {
-            method: "GET",
-            path: "/projects/{proxy+}",
-            eventHandler: async (event) => await getProject(event, projectTable.name.get())
+            path: "/account/{proxy+}",
+            eventHandler: async (event) => await getAccount(event, dataTable.name.get())
         },
         {
             method: "GET",
@@ -152,13 +137,28 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
         },
         {
             method: "GET",
+            path: "/projects",
+            eventHandler: async (event) => await getAllProjects(event)
+        },
+        {
+            method: "POST",
+            path: "/account",
+            eventHandler: async (event) => await createAccountWithSigning(event, dataTable.name.get())
+        },
+        {
+            method: "GET",
+            path: "/projects/{proxy+}",
+            eventHandler: async (event) => await getProject(event, projectTable.name.get())
+        },
+        
+        {
+            method: "GET",
             path: "/events/{proxy+}",
             eventHandler: new aws.lambda.CallbackFunction("getEvent", {
                 memorySize: 512,
                 callback: async (event) => await getEvent(event, { dataTable: dataTable.name.get(), projectTable: projectTable.name.get() }),
             })
         },
-
         {
             method: "GET",
             path: "/events/proof/{proxy+}",
@@ -196,9 +196,6 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
             method: "GET",
             path: "/accounts/{proxy+}",
             eventHandler: async (event) => await getAccount(event, dataTable.name.get())
-        },
-        {
-            method: "GET", path: "/createAccount/{proxy+}", eventHandler: async (event) => await createAccount(event, dataTable.name.get()),
         },
         {
             method: "GET",
@@ -278,12 +275,6 @@ const domain = new aws.apigateway.DomainName("domain", {
     domainName: domainName,
 });
 
-const mapping = new aws.apigateway.BasePathMapping("mapping", {
-    restApi: angpowApi.restAPI,
-    basePath: "lucky-red-envelope",
-    stageName: angpowApi.stage.stageName,
-    domainName: domain.domainName,
-});
 
 const mapping2 = new aws.apigateway.BasePathMapping("mapping-2", {
     restApi: LuckboxApi.restAPI,
