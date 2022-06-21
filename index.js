@@ -21,6 +21,7 @@ const {
     updateEvent,
     getRegistered,
     getCollections,
+    createCollection,
     proxy
 } = require("./routes")
 
@@ -204,6 +205,14 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
             method: "GET",
             path: "/collections",
             eventHandler: async (event) => await getCollections(event, collectionTable.name.get())
+        },
+        {
+            method: "POST",
+            path: "/collection",
+            eventHandler: new aws.lambda.CallbackFunction("create-collection", {
+                memorySize: 256,
+                callback: async (event) => await createCollection(event, collectionTable.name.get()),
+            })
         },
         {
             method: "GET",
