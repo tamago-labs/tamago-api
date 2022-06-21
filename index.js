@@ -20,11 +20,6 @@ const {
     register,
     updateEvent,
     getRegistered,
-    getAllOrders,
-    createOrder,
-    getOrder,
-    confirmOrder,
-    cancelOrder,
     getCollections,
     proxy
 } = require("./routes")
@@ -143,14 +138,17 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
         {
             method: "POST",
             path: "/account",
-            eventHandler: async (event) => await createAccountWithSigning(event, dataTable.name.get())
+            eventHandler: new aws.lambda.CallbackFunction("create-account-with-signing", {
+                memorySize: 256,
+                callback: async (event) => await createAccountWithSigning(event, dataTable.name.get()),
+            })
         },
         {
             method: "GET",
             path: "/projects/{proxy+}",
             eventHandler: async (event) => await getProject(event, projectTable.name.get())
         },
-        
+
         {
             method: "GET",
             path: "/events/{proxy+}",
@@ -201,31 +199,6 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
             method: "GET",
             path: "/rewards",
             eventHandler: async (event) => await getAllRewards(event, dataTable.name.get())
-        },
-        {
-            method: "GET",
-            path: "/orders",
-            eventHandler: async (event) => await getAllOrders(event, orderTable.name.get())
-        },
-        {
-            method: "POST",
-            path: "/orders",
-            eventHandler: async (event) => await createOrder(event, orderTable.name.get())
-        },
-        {
-            method: "POST",
-            path: "/orders/confirm",
-            eventHandler: async (event) => await confirmOrder(event, orderTable.name.get())
-        },
-        {
-            method: "POST",
-            path: "/orders/cancel",
-            eventHandler: async (event) => await cancelOrder(event, orderTable.name.get())
-        },
-        {
-            method: "GET",
-            path: "/orders/{proxy+}",
-            eventHandler: async (event) => await getOrder(event, orderTable.name.get())
         },
         {
             method: "GET",

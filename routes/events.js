@@ -24,29 +24,34 @@ const getParticipants = async (currentTimestamp, projectTable, projectIds) => {
 
     for (let projectId of projectIds) {
 
-        const client = new aws.sdk.DynamoDB.DocumentClient()
+        try {
+            const client = new aws.sdk.DynamoDB.DocumentClient()
 
-        const projectParams = {
-            TableName: projectTable,
-            KeyConditionExpression: "#projectId = :projectId and #timestamp BETWEEN :from AND :to",
-            ExpressionAttributeNames: {
-                "#projectId": "projectId",
-                "#timestamp": "timestamp"
-            },
-            ExpressionAttributeValues: {
-                ":projectId": Number(projectId),
-                ":from": last3DayTimestamp,
-                ":to": currentTimestamp
-            }
-        };
+            const projectParams = {
+                TableName: projectTable,
+                KeyConditionExpression: "#projectId = :projectId and #timestamp BETWEEN :from AND :to",
+                ExpressionAttributeNames: {
+                    "#projectId": "projectId",
+                    "#timestamp": "timestamp"
+                },
+                ExpressionAttributeValues: {
+                    ":projectId": Number(projectId),
+                    ":from": last3DayTimestamp,
+                    ":to": currentTimestamp
+                }
+            };
 
-        const { Items } = await client.query(projectParams).promise()
-        const lastItem = Items[Items.length - 1]
-        const { holders } = lastItem
+            const { Items } = await client.query(projectParams).promise()
+            const lastItem = Items[Items.length - 1]
+            const { holders } = lastItem
 
-        snapshotTimestamp = lastItem.timestamp
+            snapshotTimestamp = lastItem.timestamp
 
-        participants = participants.concat(holders)
+            participants = participants.concat(holders)
+        } catch (e) {
+
+        }
+
     }
 
     return {
@@ -245,7 +250,7 @@ const _createEvent = async (event, { dataTable, projectTable, bucket }) => {
                         "value": `${eventId}`,
                         "eventId": `${eventId}`,
                         spots,
-                        wallets : 0
+                        wallets: 0
                     }
                 }
 
