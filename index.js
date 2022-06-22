@@ -20,12 +20,9 @@ const {
     register,
     updateEvent,
     getRegistered,
-    getAllOrders,
-    createOrder,
-    getOrder,
-    confirmOrder,
-    cancelOrder,
     getCollections,
+    getCollection,
+    createCollection,
     proxy
 } = require("./routes")
 
@@ -143,14 +140,17 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
         {
             method: "POST",
             path: "/account",
-            eventHandler: async (event) => await createAccountWithSigning(event, dataTable.name.get())
+            eventHandler: new aws.lambda.CallbackFunction("create-account-with-signing", {
+                memorySize: 256,
+                callback: async (event) => await createAccountWithSigning(event, dataTable.name.get()),
+            })
         },
         {
             method: "GET",
             path: "/projects/{proxy+}",
             eventHandler: async (event) => await getProject(event, projectTable.name.get())
         },
-        
+
         {
             method: "GET",
             path: "/events/{proxy+}",
@@ -204,33 +204,24 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
         },
         {
             method: "GET",
-            path: "/orders",
-            eventHandler: async (event) => await getAllOrders(event, orderTable.name.get())
-        },
-        {
-            method: "POST",
-            path: "/orders",
-            eventHandler: async (event) => await createOrder(event, orderTable.name.get())
-        },
-        {
-            method: "POST",
-            path: "/orders/confirm",
-            eventHandler: async (event) => await confirmOrder(event, orderTable.name.get())
-        },
-        {
-            method: "POST",
-            path: "/orders/cancel",
-            eventHandler: async (event) => await cancelOrder(event, orderTable.name.get())
-        },
-        {
-            method: "GET",
-            path: "/orders/{proxy+}",
-            eventHandler: async (event) => await getOrder(event, orderTable.name.get())
-        },
-        {
-            method: "GET",
             path: "/collections",
             eventHandler: async (event) => await getCollections(event, collectionTable.name.get())
+        },
+        {
+            method: "POST",
+            path: "/collection",
+            eventHandler: new aws.lambda.CallbackFunction("create-collection", {
+                memorySize: 256,
+                callback: async (event) => await createCollection(event, collectionTable.name.get()),
+            })
+        },
+        {
+            method: "GET",
+            path: "/collection/{proxy+}",
+            eventHandler: new aws.lambda.CallbackFunction("get-collection", {
+                memorySize: 512,
+                callback: async (event) => await getCollection(event, collectionTable.name.get()),
+            })
         },
         {
             method: "GET",

@@ -50,77 +50,6 @@ const getAccount = async (event, tableName) => {
 
 }
 
-// no longer used
-const createAccount = async (event, tableName) => {
-
-    try {
-
-        if (event && event.pathParameters) {
-
-            // const client = new aws.sdk.DynamoDB.DocumentClient()
-            const base64String = event.pathParameters.proxy
-
-            const buff = Buffer.from(base64String, "base64");
-            const eventBodyStr = buff.toString('UTF-8');
-            const eventBody = JSON.parse(eventBodyStr);
-
-            console.log("Receiving payload : ", eventBody)
-
-            // example payload
-            // {
-            //     username : pisuthd.nft,
-            //     address : xxxx,
-            //     disabled : false,
-            //     email : pisuth@tamago.finance
-            // }
-
-            if (eventBody && check.like(eventBody, Account)) {
-
-                const params = {
-                    TableName: tableName,
-                    Item: {
-                        ...eventBody,
-                        "key": "account",
-                        "value": eventBody.username
-                    }
-                }
-
-                console.log("saving : ", params)
-
-                const client = new aws.sdk.DynamoDB.DocumentClient()
-
-                await client.put(params).promise()
-
-                return {
-                    statusCode: 200,
-                    headers,
-                    body: JSON.stringify({
-                        "status": "ok",
-                        "username": eventBody.username
-                    }),
-                }
-
-            } else {
-                throw new Error("Invalid JSON structure")
-            }
-
-        } else {
-            throw new Error("Invalid input")
-        }
-
-    } catch (error) {
-        return {
-            statusCode: 400,
-            headers,
-            body: JSON.stringify({
-                status: "error",
-                message: `${error.message || "Unknown error."}`
-            }),
-        };
-    }
-
-}
-
 const createAccountWithSigning = async (event, tableName) => {
 
     console.log("Createing an account")
@@ -190,6 +119,5 @@ const createAccountWithSigning = async (event, tableName) => {
 
 module.exports = {
     getAccount,
-    createAccount,
     createAccountWithSigning
 }
