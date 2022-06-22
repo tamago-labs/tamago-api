@@ -1,6 +1,9 @@
-
+const Moralis = require("moralis/node")
 
 const { ethers } = require("ethers");
+const { SUPPORT_MAINNET, SUPPORT_TESTNET } = require("../constants");
+const { even } = require("check-types");
+
 
 const generateWinners = ({
     rewards,
@@ -122,10 +125,152 @@ const base64ToImage = (dataurl, filename) => {
     // return new File([u8arr], filename + extension, { type: mime });
 }
 
+const generateMoralisParams = (chainId) => {
+    if (SUPPORT_TESTNET.indexOf(chainId) !== -1) {
+        return {
+            serverUrl: "https://1ovp3qunsgo4.usemoralis.com:2053/server",
+            appId: "enCW1fXy8eMazgGNIgwKdOicHVw67k0AegYAr2eE",
+            masterKey: "AdNlpYjZuuiCGzlPaonWrJoGSIB6Scnae2AiNY6B"
+        }
+    }
+    if (SUPPORT_MAINNET.indexOf(chainId) !== -1) {
+        return {
+            serverUrl: "https://cybgqjtb97zb.usemoralis.com:2053/server",
+            appId: "c5pJEepQAhugEYhT4xmn5FUvWRij5Rvbpn7yZGJ9",
+            masterKey: "1OKt4BCqp7OcDwKmJGmrJTBeadyhfyznSrFnU1IB"
+        }
+    }
+    throw new Error("Chain isn't supported")
+}
+
+
+const BURNT_ADDRESSES = ["0x000000000000000000000000000000000000dEaD", "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000001"]
+
+const isNotBurnAddress = (address) => {
+    return (BURNT_ADDRESSES.map(item => item.toLowerCase()).indexOf(address.toLowerCase()) === -1)
+}
+
+const walletsToHolders = (wallets) => {
+    // filter the holder who has no NFTs in their wallet
+    return Object.keys(wallets).reduce((output, item) => {
+
+        let itemCount = 0
+
+        const ids = Object.keys(wallets[item])
+
+        for (let id of ids) {
+            if (wallets[item][id] > 0) {
+                itemCount += 1
+            }
+        }
+
+        if (itemCount !== 0 && isNotBurnAddress(item)) {
+            output.push(item)
+        }
+
+        return output
+    }, [])
+}
+
+const fetchQuery =  async (query, timestamp) => {
+    query.limit(1000)
+
+    if (timestamp) {
+        query.lessThan("block_timestamp", new Date(timestamp * 1000))
+    }
+
+    let evts = []
+    let isMore = true 
+    let count = 0
+
+    while(isMore) {
+        query.skip(1000 * count)
+        const events = await query.find();
+        if (events.length !== 1000) {
+            isMore = false
+        }
+        evts = evts.concat(events)
+        count += 1
+    }
+
+    return evts
+}
+
+const collectErc721Holders = async (chainId, tableName, timestamp) => {
+
+    await Moralis.start(generateMoralisParams(chainId))
+
+    const Events = Moralis.Object.extend(`${tableName}`);
+    const transferQuery = new Moralis.Query(Events);
+
+    const transferEvents = await fetchQuery(transferQuery, timestamp)
+
+    console.log(`Total : ${transferEvents.length} events`)
+
+    const parsed = transferEvents.map(event => [event.get("from"), event.get("to"), (event.get("tokenId")).toString()]) // sender, recipient, tokenId
+
+    const wallets = parsed.reduce((json, event) => {
+        // set intial values 
+        if (!json[event[1]]) json[event[1]] = {}
+        if (!(json[event[1]][event[2]])) json[event[1]][event[2]] = 0
+        if (!json[event[0]]) json[event[0]] = {}
+        if (!(json[event[0]][event[2]])) json[event[0]][event[2]] = 0
+
+        // debit the recipient
+        json[event[1]][event[2]] += 1
+        // deduct the sender
+        json[event[0]][event[2]] -= 1
+        return json
+    }, {})
+
+    return walletsToHolders(wallets)
+}
+
+const collectErc1155Holders = async (chainId, tableName, timestamp) => {
+
+    await Moralis.start(generateMoralisParams(chainId))
+
+    const EventsSingle = Moralis.Object.extend(`${tableName}Single`);
+    let transferSingleQuery = new Moralis.Query(EventsSingle);
+
+    const transferSingleEvents = await fetchQuery(transferSingleQuery, timestamp)
+
+    const EventsBatch = Moralis.Object.extend(`${tableName}Batch`);
+    let transferBatchQuery = new Moralis.Query(EventsBatch);
+    const transferBatchEvents = await fetchQuery(transferBatchQuery, timestamp)
+
+    console.log(`Total : ${transferSingleEvents.length + transferBatchEvents.length} events`)
+
+    const parsedBatchEvents = transferBatchEvents.map(event => [event.get("from"), event.get("to"), event.get("ids"), event.get("values")])
+    const parsedSingleEvents = transferSingleEvents.map(event => [event.get("from"), event.get("to"), [event.get("id")], [event.get("value")]])
+
+    const wallets = (parsedBatchEvents.concat(parsedSingleEvents)).reduce((json, event) => {
+        // set intial values 
+        if (!json[event[1]]) json[event[1]] = {}
+        if (!json[event[0]]) json[event[0]] = {}
+        for (let tokenId of event[2]) {
+            if (!(json[event[1]][tokenId])) json[event[1]][tokenId] = 0
+            if (!(json[event[0]][tokenId])) json[event[0]][tokenId] = 0
+
+            // debit the recipient
+            json[event[1]][tokenId] += Number(event[3])
+            // deduct the sender
+            json[event[0]][tokenId] -= Number(event[3])
+
+        }
+
+        return json
+    }, {})
+
+    return walletsToHolders(wallets)
+}
+
 module.exports = {
     generateWinners,
     finalizeWinners,
     getProvider,
     parseBody,
-
+    generateMoralisParams,
+    collectErc721Holders,
+    collectErc1155Holders
 }

@@ -5,11 +5,11 @@ const check = require('check-types');
 
 const Moralis = require("moralis/node")
 
-
-const { parseBody } = require("../utils")
+const { parseBody, generateMoralisParams, collectErc721Holders, collectErc1155Holders } = require("../utils")
 const { CollectionCreate } = require("../types/collection")
 
 const { headers } = require("./headers")
+const { SUPPORT_MAINNET, SUPPORT_TESTNET } = require("../constants")
 
 const getCollections = async (event, tableName) => {
 
@@ -17,27 +17,34 @@ const getCollections = async (event, tableName) => {
 
     try {
 
-        const params = {
-            TableName: tableName,
-            KeyConditionExpression: "#chainId = :chainId",
-            ExpressionAttributeNames: {
-                "#chainId": "chainId"
-            },
-            ExpressionAttributeValues: {
-                ":chainId": 42
-            },
-            // ProjectionExpression: "orderId"
-        };
+        let collections = []
 
         const client = new aws.sdk.DynamoDB.DocumentClient()
-        const { Items } = await client.query(params).promise()
+
+        for (let chainId of SUPPORT_MAINNET) {
+
+            const params = {
+                TableName: tableName,
+                KeyConditionExpression: "#chainId = :chainId",
+                ExpressionAttributeNames: {
+                    "#chainId": "chainId"
+                },
+                ExpressionAttributeValues: {
+                    ":chainId": chainId
+                }
+            };
+
+            const { Items } = await client.query(params).promise()
+
+            collections = collections.concat(Items)
+        }
 
         return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
                 status: "ok",
-                collections: Items
+                collections
             }),
         }
 
@@ -53,22 +60,86 @@ const getCollections = async (event, tableName) => {
     }
 }
 
-const generateMoralisParams = (chainId) => {
-    if ([42, 80001, 97, 43113].indexOf(chainId) !== -1) {
-        return {
-            serverUrl: "https://1ovp3qunsgo4.usemoralis.com:2053/server",
-            appId: "enCW1fXy8eMazgGNIgwKdOicHVw67k0AegYAr2eE",
-            masterKey: "AdNlpYjZuuiCGzlPaonWrJoGSIB6Scnae2AiNY6B"
+
+const getCollection = async (event, tableName) => {
+
+    console.log("creating a collection...")
+
+    try {
+
+        console.log("EVENT: \n" + JSON.stringify(event, null, 2))
+
+        if (event && event.pathParameters) {
+            const client = new aws.sdk.DynamoDB.DocumentClient()
+
+            let currentTimestamp = Math.floor(new Date().valueOf() / 1000)
+
+            if (event.queryStringParameters && event.queryStringParameters.timestamp) {
+                currentTimestamp = Number(event.queryStringParameters.timestamp)
+            }
+
+            const proxy = event.pathParameters.proxy
+
+            const chainId = proxy.split("/")[0]
+            const contractAddress = proxy.split("/")[1]
+
+            const params = {
+                TableName: tableName,
+                Key: {
+                    "chainId": Number(chainId),
+                    "contractAddress": `${contractAddress.toLowerCase()}`
+                }
+            }
+
+            const { Item } = await client.get(params).promise()
+
+            if (Item) {
+
+                const { chainId, name, is1155, contractAddress, verified, tableName } = Item
+
+                let holders = []
+
+                // checking events
+
+                console.log("Checking transfers events...")
+
+                if (is1155) {
+                    holders = await collectErc1155Holders(chainId, tableName, currentTimestamp)
+                } else {
+                    holders = await collectErc721Holders(chainId, tableName, currentTimestamp)
+                }
+
+                return {
+                    statusCode: 200,
+                    headers,
+                    body: JSON.stringify({
+                        status: "ok",
+                        name,
+                        chainId,
+                        is1155,
+                        contractAddress,
+                        verified,
+                        holders
+                    }),
+                }
+            } else {
+                throw new Error("Your contract address and/or chain id is invalid")
+            }
         }
-    }
-    if ([56, 137, 43114, 1].indexOf(chainId) !== -1) {
+
+        throw new Error("Invalid query params")
+
+    } catch (error) {
         return {
-            serverUrl: "https://cybgqjtb97zb.usemoralis.com:2053/server",
-            appId: "c5pJEepQAhugEYhT4xmn5FUvWRij5Rvbpn7yZGJ9",
-            masterKey: "1OKt4BCqp7OcDwKmJGmrJTBeadyhfyznSrFnU1IB"
-        }
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({
+                status: "error",
+                message: `${error.message || "Unknown error."}`
+            }),
+        };
     }
-    throw new Error("Chain isn't supported")
+
 }
 
 const createCollection = async (event, tableName) => {
@@ -258,14 +329,13 @@ const createCollection = async (event, tableName) => {
                 };
 
                 Moralis.Cloud.run("watchContractEvent", options, { useMasterKey: true });
-
             }
 
             params = {
                 TableName: tableName,
                 Item: {
                     "chainId": chainId,
-                    "contractAddress": contractAddress,
+                    "contractAddress": contractAddress.toLowerCase(),
                     name,
                     tableName: moralisTableName,
                     is1155,
@@ -306,5 +376,6 @@ const createCollection = async (event, tableName) => {
 
 module.exports = {
     getCollections,
-    createCollection
+    createCollection,
+    getCollection
 }
