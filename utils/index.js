@@ -152,7 +152,8 @@ const isNotBurnAddress = (address) => {
 
 const walletsToHolders = (wallets) => {
     // filter the holder who has no NFTs in their wallet
-    return Object.keys(wallets).reduce((output, item) => {
+
+    const holders = Object.keys(wallets).reduce((output, item) => {
 
         let itemCount = 0
 
@@ -170,9 +171,24 @@ const walletsToHolders = (wallets) => {
 
         return output
     }, [])
+
+    const ids = Object.keys(wallets).reduce((output, item) => {
+        const ids = Object.keys(wallets[item])
+        for (let id of ids) {
+            if (output.indexOf(id) === -1) {
+                output.push(id)
+            }
+        }
+        return output
+    }, [])
+
+    return {
+        holders,
+        ids
+    }
 }
 
-const fetchQuery =  async (query, timestamp) => {
+const fetchQuery = async (query, timestamp) => {
     query.limit(1000)
 
     if (timestamp) {
@@ -180,10 +196,10 @@ const fetchQuery =  async (query, timestamp) => {
     }
 
     let evts = []
-    let isMore = true 
+    let isMore = true
     let count = 0
 
-    while(isMore) {
+    while (isMore) {
         query.skip(1000 * count)
         const events = await query.find();
         if (events.length !== 1000) {

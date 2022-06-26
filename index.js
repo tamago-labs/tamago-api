@@ -17,13 +17,20 @@ const {
     createEvent,
     _createEvent,
     getAllRewards,
+    createReward,
     register,
     updateEvent,
     getRegistered,
     getCollections,
     getCollection,
     createCollection,
-    proxy
+    proxy,
+    createCampaign,
+    confirmCampaign,
+    getAllCampaigns,
+    getCampaign,
+    updateCampaign,
+    removeCampaign
 } = require("./routes")
 
 const Headers = {
@@ -72,8 +79,8 @@ const projectTable = new aws.dynamodb.Table(
     }
 )
 
-const orderTable = new aws.dynamodb.Table(
-    "orderTable",
+const campaignTable = new aws.dynamodb.Table(
+    "campaignTable",
     {
         attributes: [
             {
@@ -81,12 +88,12 @@ const orderTable = new aws.dynamodb.Table(
                 type: "N"
             },
             {
-                name: "orderId",
+                name: "campaignId",
                 type: "N"
             }
         ],
         hashKey: "version",
-        rangeKey: "orderId",
+        rangeKey: "campaignId",
         billingMode: "PAY_PER_REQUEST"
     }
 )
@@ -203,6 +210,11 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
             eventHandler: async (event) => await getAllRewards(event, dataTable.name.get())
         },
         {
+            method: "POST",
+            path: "/rewards",
+            eventHandler: async (event) => await createReward(event, dataTable.name.get())
+        },
+        {
             method: "GET",
             path: "/collections",
             eventHandler: async (event) => await getCollections(event, collectionTable.name.get())
@@ -224,10 +236,50 @@ const LuckboxApi = new awsx.apigateway.API("luckbox-api", {
             })
         },
         {
-            method: "GET",
-            path: "/proxy/{proxy+}",
-            eventHandler: async (event) => await proxy(event)
+            method: "POST",
+            path: "/campaigns",
+            eventHandler: new aws.lambda.CallbackFunction("create-campaign", {
+                memorySize: 256,
+                callback: async (event) => await createCampaign(event, campaignTable.name.get()),
+            })
         },
+        {
+            method: "POST",
+            path: "/campaigns/{proxy+}",
+            eventHandler: new aws.lambda.CallbackFunction("confirm-campaign", {
+                memorySize: 256,
+                callback: async (event) => await confirmCampaign(event, campaignTable.name.get()),
+            })
+        },
+        {
+            method: "GET",
+            path: "/campaigns",
+            eventHandler: new aws.lambda.CallbackFunction("get-all-campaigns", {
+                memorySize: 256,
+                callback: async (event) => await getAllCampaigns(event, campaignTable.name.get()),
+            })
+        },
+        {
+            method: "GET",
+            path: "/campaign/{proxy+}",
+            eventHandler: new aws.lambda.CallbackFunction("get-campaign", {
+                memorySize: 512,
+                callback: async (event) => await getCampaign(event, campaignTable.name.get()),
+            })
+        },
+        // {
+        //     method: "POST",
+        //     path: "/campaign/{proxy+}",
+        //     eventHandler: new aws.lambda.CallbackFunction("update-campaign", {
+        //         memorySize: 256,
+        //         callback: async (event) => await updateCampaign(event, campaignTable.name.get()),
+        //     })
+        // },
+        // {
+        //     method: "GET",
+        //     path: "/proxy/{proxy+}",
+        //     eventHandler: async (event) => await proxy(event)
+        // },
     ]
 })
 
