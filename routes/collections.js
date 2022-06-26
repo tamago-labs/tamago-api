@@ -63,7 +63,7 @@ const getCollections = async (event, tableName) => {
 
 const getCollection = async (event, tableName) => {
 
-    console.log("creating a collection...")
+    console.log("getting collection info...")
 
     try {
 
@@ -98,15 +98,20 @@ const getCollection = async (event, tableName) => {
                 const { chainId, name, is1155, contractAddress, verified, tableName } = Item
 
                 let holders = []
+                let ids = []
 
                 // checking events
 
                 console.log("Checking transfers events...")
 
                 if (is1155) {
-                    holders = await collectErc1155Holders(chainId, tableName, currentTimestamp)
+                    const response = await collectErc1155Holders(chainId, tableName, currentTimestamp)
+                    holders = response.holders
+                    ids = response.ids
                 } else {
-                    holders = await collectErc721Holders(chainId, tableName, currentTimestamp)
+                    const response = await collectErc721Holders(chainId, tableName, currentTimestamp)
+                    holders = response.holders
+                    ids = response.ids
                 }
 
                 return {
@@ -119,7 +124,9 @@ const getCollection = async (event, tableName) => {
                         is1155,
                         contractAddress,
                         verified,
-                        holders
+                        holders,
+                        tokenIds: ids,
+                        timestamp: currentTimestamp
                     }),
                 }
             } else {
@@ -185,7 +192,7 @@ const createCollection = async (event, tableName) => {
 
             console.log("Subscribe Smart Contract events on Moralis...")
 
-            let moralisTableName = `${name.replace(/\./g, '').replace(/\s+/g, '').toLowerCase()}`
+            let moralisTableName = `${name.replace(/\./g, '').replace(/\s+/g, '').replace(/[0-9]/g, '').replace(/[^a-zA-Z ]/g, "").toLowerCase()}`
 
             if (moralisTableName.length >= 16) {
                 moralisTableName = moralisTableName.substring(0, 16)
