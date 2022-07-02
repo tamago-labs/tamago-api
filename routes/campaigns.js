@@ -104,14 +104,17 @@ const confirmCampaign = async (event, tableName) => {
 
         console.log("BODY: \n", body)
 
-        if (type === "confirm") {
-            const { campaignId, contractAddress, message, signature, owner } = body
+        if (type === "update") {
+
+            const { campaign, message, signature, ownerAddress } = body
+            const { campaignId } = campaign
+
             // verify the address
-            console.log("Verifying the address :  ", owner)
+            console.log("Verifying the address :  ", ownerAddress)
 
             const recoveredAddress = ethers.utils.verifyMessage(message, signature)
 
-            if (recoveredAddress.toLowerCase() === owner.toLowerCase()) {
+            if (recoveredAddress.toLowerCase() === ownerAddress.toLowerCase()) {
 
                 let params = {
                     TableName: tableName,
@@ -121,7 +124,112 @@ const confirmCampaign = async (event, tableName) => {
                     }
                 };
 
-                
+                const { Item } = await client.get(params).promise()
+
+                if (Item) {
+
+                    params = {
+                        TableName: tableName,
+                        Item: {
+                            ...Item,
+                            ...campaign
+                        }
+                    }
+
+                    console.log("updating : ", params)
+
+                    await client.put(params).promise()
+
+                    return {
+                        statusCode: 200,
+                        headers,
+                        body: JSON.stringify({
+                            "status": "ok",
+                            "campaignId": campaignId
+                        }),
+                    }
+
+                } else {
+                    throw new Error("Invalid given campaign ID")
+                }
+
+            } else {
+                throw new Error("Invalid signed message")
+            }
+
+
+        } else if (type === "remove") {
+
+            const { campaignId, message, signature, ownerAddress } = body
+
+            // verify the address
+            console.log("Verifying the address :  ", ownerAddress)
+
+            const recoveredAddress = ethers.utils.verifyMessage(message, signature)
+
+            if (recoveredAddress.toLowerCase() === ownerAddress.toLowerCase()) {
+
+                let params = {
+                    TableName: tableName,
+                    Key: {
+                        "version": 2,
+                        "campaignId": campaignId
+                    }
+                };
+
+
+                const { Item } = await client.get(params).promise()
+
+                if (Item) {
+
+                    params = {
+                        TableName: tableName,
+                        Item: {
+                            ...Item,
+                            visible: false
+                        }
+                    }
+
+                    console.log("saving : ", params)
+
+                    await client.put(params).promise()
+
+                    return {
+                        statusCode: 200,
+                        headers,
+                        body: JSON.stringify({
+                            "status": "ok",
+                            "campaignId": campaignId
+                        }),
+                    }
+
+                } else {
+                    throw new Error("Invalid given campaign ID")
+                }
+
+            } else {
+                throw new Error("Invalid signed message")
+            }
+
+
+        } else if (type === "confirm") {
+            const { campaignId, contractAddress, message, signature, ownerAddress } = body
+            // verify the address
+            console.log("Verifying the address :  ", ownerAddress)
+
+            const recoveredAddress = ethers.utils.verifyMessage(message, signature)
+
+            if (recoveredAddress.toLowerCase() === ownerAddress.toLowerCase()) {
+
+                let params = {
+                    TableName: tableName,
+                    Key: {
+                        "version": 2,
+                        "campaignId": campaignId
+                    }
+                };
+
+
                 const { Item } = await client.get(params).promise()
 
                 if (Item) {
@@ -158,7 +266,62 @@ const confirmCampaign = async (event, tableName) => {
                 throw new Error("Invalid signed message")
             }
 
-        } else if (type === "register") {
+        } else if (type === "winners") {
+
+            const { winners, campaignId, message, signature, ownerAddress } = body
+
+            const recoveredAddress = ethers.utils.verifyMessage(message, signature)
+
+            if (recoveredAddress.toLowerCase() === ownerAddress.toLowerCase()) {
+
+                let params = {
+                    TableName: tableName,
+                    Key: {
+                        "version": 2,
+                        "campaignId": Number(campaignId)
+                    }
+                };
+
+                const { Item } = await client.get(params).promise()
+
+                if (Item) {
+
+                    if (!Item["winners"]) {
+                        Item["winners"] = []
+                    }
+    
+                    Item["winners"] = winners
+    
+                    params = {
+                        TableName: tableName,
+                        Item
+                    }
+    
+                    console.log("saving: \n", Item)
+    
+                    await client.put(params).promise()
+    
+                    return {
+                        statusCode: 200,
+                        headers,
+                        body: JSON.stringify({
+                            "status": "ok",
+                            "campaignId": campaignId
+                        }),
+                    }
+
+                } else {
+                    throw new Error("Invalid given campaign ID")
+                }
+
+            } else {
+                throw new Error("Invalid signed message")
+            }
+
+        }
+
+
+        else if (type === "register") {
 
             const { walletAddress, campaignId } = body
 
@@ -239,7 +402,7 @@ const getAllCampaigns = async (event, tableName) => {
             ExpressionAttributeValues: {
                 ":version": 2
             },
-            ProjectionExpression: "campaignId, slug, title, imageUrl, claimStart, claimEnd, chainId, participants, visible, confirmed, community, spots, registered"
+            ProjectionExpression: "campaignId, slug, title, imageUrl, claimStart, claimEnd, chainId, participants, visible, confirmed, community, spots, registered, ownerAddress"
         };
 
         const client = new aws.sdk.DynamoDB.DocumentClient()
