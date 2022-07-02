@@ -539,7 +539,7 @@ const getEvent = async (event, { dataTable, projectTable }) => {
                 const registered = Item.registered ? (Item.registered).map(item => item.toLowerCase()) : []
 
                 console.log("all registered wallets :\n", registered)
-                const eligibleParticipants = participants.filter(item => registered.indexOf(item.toLowerCase()) !== -1)
+                const eligibleParticipants = participants.length > 0 ? participants.filter(item => registered.indexOf(item.toLowerCase()) !== -1) : registered
 
                 console.log("all eligible participants :\n", eligibleParticipants)
 
@@ -696,7 +696,7 @@ const generateProof = async (event, { dataTable, projectTable }) => {
                 const registered = Item.registered ? (Item.registered).map(item => item.toLowerCase()) : []
 
                 console.log("all registered wallets :\n", registered)
-                const eligibleParticipants = participants.filter(item => registered.indexOf(item.toLowerCase()) !== -1)
+                const eligibleParticipants = participants.length > 0 ? participants.filter(item => registered.indexOf(item.toLowerCase()) !== -1) : registered
 
                 console.log("all eligible participants :\n", eligibleParticipants)
 
